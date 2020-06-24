@@ -1,0 +1,10 @@
+2020-06-24 10:54:49,377 [Worker-9: Loading available Gradle versions] INFO  o.e.b.c.i.u.g.PublishedGradleVersions - Gradle version information cache is out-of-date. Trying to update.
+2020-06-24 10:55:29,262 [Worker-3: Importing Maven projects] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: edu.brown.cs:sonicskillz:1.0 @ /Users/jennifernino/Desktop/project/term-project-cli75-jninotap-mislam8-ncousin2-1-master/pom.xml.
+2020-06-24 10:55:30,771 [Worker-3: Importing Maven projects] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding source folder /term-project-cli75-jninotap-mislam8-ncousin2-1-master/src/main/java
+2020-06-24 10:55:30,771 [Worker-3: Importing Maven projects] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding resource folder /term-project-cli75-jninotap-mislam8-ncousin2-1-master/src/main/resources
+2020-06-24 10:55:30,774 [Worker-3: Importing Maven projects] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding source folder /term-project-cli75-jninotap-mislam8-ncousin2-1-master/src/test/java
+2020-06-24 10:55:31,063 [Worker-3: Importing Maven projects] INFO  o.e.m.c.i.p.ProjectConfigurationManager - Imported and configured 1 project(s) in 7 sec
+2020-06-24 10:55:35,894 [Worker-12: Building] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2020-06-24 10:55:35,957 [Worker-12: Building] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 25 resources
+2020-06-24 10:55:36,157 [Worker-12: Building] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2020-06-24 10:55:36,157 [Worker-12: Building] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/jennifernino/Desktop/project/term-project-cli75-jninotap-mislam8-ncousin2-1-master/src/test/resources

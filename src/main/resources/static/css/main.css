@@ -1,0 +1,590 @@
+/*
+ * General
+ */
+html, body {
+  font-family: 'Open Sans', sans-serif;
+  font-family: 'Montserrat', sans-serif;
+  text-align: center;
+  color: #1b262c;
+  width: 100vw;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+#submit-button {
+  font-size: calc(10px + 0.8vw);
+}
+
+nav {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-item {
+  color: #48C774;
+  font-size: calc(15px + 2.5vw);
+  padding: 0;
+}
+
+#mainlink {
+  padding: 0;
+}
+
+#home-icon {
+  margin-right: 20px;
+  color: #48C774;
+}
+
+#col {
+  text-align: center;
+}
+
+.small-text {
+  font-size: calc(12px + .7vw);
+  margin: 10px;
+}
+.is-robot {
+  font-family: 'VT323', monospace;
+}
+
+.is-red {
+  color: red;
+}
+
+.is-green {
+  color: #48C774;
+}
+
+.inputbox {
+  display: inline-block;
+}
+
+.inputlabel {
+  display: inline-block;
+}
+
+/*
+ * Home
+ */
+#home-container {
+  margin: 0;
+  text-align: center;
+}
+
+#title {
+  font-family: 'VT323', monospace;
+  font-size: calc(15px + 9vw);
+  font-weight: lighter;
+}
+
+#subtitle {
+  font-size: calc(12px + 4vw);
+}
+#resize-button {
+  font-size: calc(12px + 1vw);
+}
+
+.section-header {
+  font-size: calc(10px + 1.5vw);
+}
+
+
+
+/*
+ * Game Home
+ */
+.instructions {
+  height: 35vh;
+  font-size: calc(12px + 1vw);
+  padding: 10px 40px;
+  overflow-y: scroll;
+  border: 2px solid #48C774;
+  border-radius: 10px;
+  margin-left: calc(30px + 6vw);
+  margin-right: calc(30px + 6vw);
+  margin-bottom: calc(10px + 1vw);
+
+}
+
+.home-buttons {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-content: space-around;
+}
+
+.game-button {
+  margin: 50px;
+  font-size: calc(12px + 1vw);
+}
+
+/*
+ * New Session
+ */
+#new-session-form {
+  display: inline-block;
+}
+
+.form-group {
+ display: flex;
+ justify-content: center;
+
+ margin-bottom: 0;
+ padding: 0;
+}
+
+#nickname {
+  width: 250px;
+}
+
+#submit-new-session {
+  background-color: #48C774;
+  margin: 30px;
+  font-size: calc(10px + 0.6vw);
+}
+
+
+
+.form-label {
+  display: inline-block;
+  font-size: calc(12px + 1vw);
+  margin:0;
+  padding: 0;
+  margin-right: 10px;
+  color: #48C774;
+  font-weight: bolder;
+}
+
+/*
+ * Join Session
+ */
+#join-session-form {
+  text-align: center;
+}
+
+#submit-join-session {
+  background-color: #48C774;
+  font-size: calc(10px + 0.6vw);
+}
+
+/*
+ * Waiting Room
+ */
+
+#game-code {
+  border-radius: 4px 0px 0px 4px;
+  outline:none;
+}
+
+#copy-clip {
+  margin: 0;
+  padding: 0;
+}
+
+#copyCode {
+  border-radius: 0px 4px 4px 0px;
+  background-color: #48C774;
+}
+
+input#game-code.input:focus{
+    outline: 0;
+}
+
+#copy-icon {
+  margin:0;
+  padding:0;
+  margin-right: 5px;
+}
+
+#host-badge {
+  font-size: calc(12px + 2.5vw);
+  margin:0;
+  padding: 0;
+  padding: 10px;
+  background-color: yellow;
+  border: 1px solid black;
+  border-radius: 45px;
+}
+
+#tag-box {
+  display: inline;
+  margin: calc(10px + 10vw);
+  margin-top: 0;
+  padding: calc(10px + 2vw);
+}
+
+.member-icon {
+  margin-right: 5px;
+  color: white;
+}
+
+.person-tag {
+  display: inline-block;
+  font-size: calc(12px + 2vw);
+  background-color: #48C774;
+  color: white;
+}
+
+#start-new-session {
+  background-color: #48C774;
+  margin: 30px;
+  font-size: calc(10px + 0.6vw);
+}
+
+/*
+ * Instructions
+ */
+#large-icon {
+  color: #48C774;
+}
+
+#tall-instr {
+  height: calc(100px + 50vh);
+  font-size: calc(10px + 0.6vw);
+}
+
+ /*
+  * game ready
+  */
+#selected {
+  font-size: calc(15px + 2vw);
+  border: none;
+  text-align: center;
+  background-color: yellow;
+  border: 1px solid black;
+  border-radius: 40px;
+  margin:0;
+  padding: 2px;
+  width: 130px;
+}
+
+#easy, #medium, #hard {
+  border-radius: 10px;
+  font-size: calc(10px + 0.6vw);
+}
+
+#row {
+  margin: 10px;
+  text-align: center;
+  margin-left: calc(20px + 8vw);
+  margin-right: calc(20px + 8vw);
+  padding-left: calc(20px + 8vw);
+  padding-right: calc(20px + 8vw);
+}
+
+#submit {
+  font-size: calc(10px + 0.8vw);
+}
+
+#songguess {
+  margin-bottom: 20px;
+}
+
+/*
+ * Welcome page
+ */
+
+/*
+ * Scoreboard
+ */
+#scoreboard {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex-wrap: nowrap;
+}
+
+.circle {
+  width: 100px;
+  height: 100px;
+  background-color: yellow;
+  border: 1px solid black;
+  border-radius: 50%;
+  padding: 3px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+}
+
+#score-name {
+  font-weight: bold;
+  font-size: calc(20px + 2vw);
+  padding: 0;
+  margin: 0;
+}
+
+.bottom-circle {
+  text-align: center;
+  color: #48C774;
+}
+
+/*
+ * Scorebaord
+ */
+#result-header-incorrect {
+  padding: 0px;
+  font-size: calc(20px + 2vw);
+  margin-bottom: 0;
+}
+
+#result-header-correct {
+  padding: 0px;
+  font-size: calc(20px + 2vw);
+}
+
+#album {
+  width: calc(100px + 35vh);
+  height: calc(100px + 35vh);
+  margin: 0;
+  padding: 0;
+}
+
+#stack {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+}
+
+.incorrect {
+  color: red;
+}
+.correct {
+  color: #48C774;
+}
+
+#answer-header {
+  margin: 0px;
+  font-size: 25px;
+  font-weight: bolder;
+}
+
+.score-text {
+  padding: 0;
+  margin: 0;
+  font-size: calc(14px + 2vh);
+}
+
+/*
+ * Final Score
+ */
+#stack-left {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-left: calc(20px + 15vh);
+}
+#left-title {
+  font-size: 80px;
+}
+
+.winner {
+  border: 2px solid black;
+  background-color: yellow;
+  border-radius: 50%;
+  width: 150px;
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  margin: 10px;
+}
+
+.final-text {
+  padding: 0;
+  margin: 0;
+  font-size: calc(20px + 2vh);
+}
+
+.final-text-point {
+  padding: 0;
+  margin: 0;
+  font-size: calc(12px + 1vh);
+}
+
+.bottom-button {
+  margin: 30px;
+}
+
+.user-score {
+  border: 2px solid black;
+  background-color: yellow;
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 10px;
+}
+
+.not-winner {
+  font-size: calc(15px + 0.5vh);
+  padding: 0;
+  margin: 0;
+}
+.not-winner-text {
+  font-size: calc(10px + 0.5vh);
+  padding: 0;
+  margin: 0;
+}
+
+#stack-scores {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  align-items: center;
+  justify-content: space-around;
+  padding-right: calc(50px + 20.5vh);
+}
+
+
+/*
+* Timer styling
+*/
+
+.base-timer {
+  position: absolute;
+  width: 100px;
+  margin-right: 0;
+}
+
+.base-timer__circle {
+  fill: none;
+  stroke: none;
+}
+
+.base-timer__label {
+  position: absolute;
+  margin-top: calc(5vw);
+  margin-left: calc(20px + 68vw);
+  border: 1px solid black;
+  width: 100px;
+  height: 100px;
+  top:0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  border-radius: 50%;
+}
+
+#play-button {
+  margin: 10px;
+}
+
+
+
+@media screen and (max-width: 850px) {
+    #stack-scores {
+      display: flex;
+      flex-wrap: wrap;
+      align-content: center;
+      align-items: center;
+      justify-content: space-around;
+      padding: 10px;
+    }
+    #stack-left {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+    }
+}
+
+@media screen and (max-width: 500px) {
+  #resize-button {
+
+  }
+  .form-group {
+   display: inline;
+
+   margin-bottom: 0;
+   padding: 0;
+  }
+
+  .inputbox {
+    display: flex;
+  }
+
+  .inputlabel {
+    display: flex;
+  }
+
+  .game-button {
+    margin: 10px;
+    font-size: calc(12px + 1vw);
+  }
+
+  #game-code {
+    border-radius: 4px 4px 4px 4px;
+    outline:none;
+  }
+
+  #copy-clip {
+    margin: 0;
+    padding: 0;
+  }
+
+  #copyCode {
+    display: none;
+  }
+
+  #start-new-session {
+    background-color: #48C774;
+    margin: 30px;
+    font-size: calc(14px + 0.6vw);
+  }
+
+  #stack-scores {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    align-items: center;
+    justify-content: space-around;
+    padding: 10px;
+  }
+  #stack-left {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+  }
+
+/**
+ * Timer
+ */
+
+  .base-timer__label{
+    font-size: 12px;
+    position: absolute;
+    margin-top: calc(100vw);
+    margin-left: calc(37vw);
+    border: 1px solid black;
+    width: 70px;
+    height: 70px;
+    top:0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    border-radius: 50%;
+  }
+
+  span#base-timer-label{
+    font-size: 15px;
+  }
+
+
+}
