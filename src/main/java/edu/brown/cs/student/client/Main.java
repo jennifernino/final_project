@@ -3,17 +3,17 @@ package edu.brown.cs.student.client;
 import java.io.File;
 import java.io.IOException;
 
+import edu.brown.cs.student.database.SpotifyDatabase;
 import freemarker.template.Configuration;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
 import spark.Spark;
 import spark.template.freemarker.FreeMarkerEngine;
 
 /**
- * The Main class of our project. This is where execution begins.
- *
+ * The Main class of our project. This is where execution
+ * begins.
  */
-public final class Main {
+public final class Main
+{
 
   private static final int DEFAULT_PORT = 4567;
   private static final int MINUTES_UNTIL_SOCKET_TIMEOUT = 20;
@@ -35,17 +35,24 @@ public final class Main {
 
   private void run() {
     // Parse command line arguments
-    OptionParser parser = new OptionParser();
-    parser.accepts("port").withRequiredArg().ofType(Integer.class).defaultsTo(DEFAULT_PORT);
-    OptionSet options = parser.parse(this.args);
+    try {
+      SpotifyDatabase.loadAllSpotifyPlaylists();
+      System.out.println("Playlists loaded");
+    } catch (RuntimeException | IOException e) {
+      // TODO Auto-generated catch block
+
+      e.printStackTrace();
+      System.out.println("Unable to load all SpotifyPlaylists");
+    }
     runSparkServer();
   }
 
   /**
-   * Gets the assigned port from Heroku (for deployment on Heroku).
+   * Gets the assigned port from Heroku (for deployment on
+   * Heroku).
    *
-   * @return returns the default port if the heroku-port isn't set (i.e. if on
-   *         localhost)
+   * @return returns the default port if the heroku-port isn't
+   *         set (i.e. if on localhost)
    */
   static int getHerokuAssignedPort() {
     ProcessBuilder processBuilder = new ProcessBuilder();
@@ -91,7 +98,8 @@ public final class Main {
       Spark.get("/error/:error", new GUIHandlers.GTSGeneralError(), freeMarker);
 
       // redirects to "/end-spotify-authorization"
-      Spark.get("/start-spotify-authorization", new AuthorizationHandlers.StartAuthHandler());
+      Spark.get("/start-spotify-authorization",
+          new AuthorizationHandlers.StartAuthHandler());
       Spark.get("/end-spotify-authorization", new AuthorizationHandlers.EndAuthHandler());
 
       Spark.post("/begin-round", new PostHandlers.BeginRoundHandler());
@@ -102,8 +110,10 @@ public final class Main {
         Spark.get("/new-session", new GUIHandlers.GTSNewSessionHandler(), freeMarker);
         Spark.get("/host-waiting-room", new GUIHandlers.GTSGetWaitingRoom(), freeMarker);
         Spark.get("/waiting-room", new GUIHandlers.GTSGetWaitingRoom(), freeMarker);
-        Spark.get("/join-session", new GUIHandlers.GTSTryJoinSessionHandler(), freeMarker);
-        Spark.get("/join-session/:error", new GUIHandlers.GTSErrorJoinSessionHandler(), freeMarker);
+        Spark.get("/join-session", new GUIHandlers.GTSTryJoinSessionHandler(),
+            freeMarker);
+        Spark.get("/join-session/:error", new GUIHandlers.GTSErrorJoinSessionHandler(),
+            freeMarker);
         Spark.get("/start-game", new GUIHandlers.GTSGetStartGameHandler(), freeMarker);
         Spark.get("/game-ready", new GUIHandlers.GTSGameReady(), freeMarker);
         Spark.get("/welcome-page", new GUIHandlers.GTSWelcomePage(), freeMarker);
@@ -115,7 +125,8 @@ public final class Main {
         Spark.post("/host-waiting-room", new PostHandlers.HostWaitingRoomHandler());
         // guest user joins
         Spark.post("/waiting-room", new PostHandlers.WaitingRoomHandler());
-        // start game - due to the way WaitingRoom.ftl is set up, only host would be
+        // start game - due to the way WaitingRoom.ftl is set up,
+        // only host would be
         // able to access this route
         Spark.post("/start-game", new PostHandlers.StartGameHandler());
         Spark.post("/guess-submitted", new PostHandlers.GuessSubmittedHandler());

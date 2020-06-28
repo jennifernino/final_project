@@ -14,6 +14,7 @@ import edu.brown.cs.student.Constants;
 import edu.brown.cs.student.client.WebSocketHandlers;
 import edu.brown.cs.student.sonicSkillz.Game;
 import edu.brown.cs.student.sonicSkillz.PlaylistGenerator;
+import edu.brown.cs.student.sonicSkillz.SpotifyPlaylistGenerator;
 import edu.brown.cs.student.sonicSkillz.gameunits.GameSession;
 import edu.brown.cs.student.sonicSkillz.gameunits.Playlist;
 import edu.brown.cs.student.sonicSkillz.gameunits.Track;
@@ -21,9 +22,9 @@ import edu.brown.cs.student.sonicSkillz.gameunits.User;
 
 /**
  * Game Class.
- *
  */
-public class GuessTheSongGame implements Game {
+public class GuessTheSongGame implements Game
+{
 
   private GameSession gameSession;
   private List<User> players;
@@ -48,17 +49,23 @@ public class GuessTheSongGame implements Game {
   /**
    * Constructor for Game class.
    *
-   * @param gameSession Allows the game to be run within a certain session on the
-   *                    main webpage
+   * @param gameSession Allows the game to be run within a
+   *                    certain session on the main webpage
    */
   public GuessTheSongGame(GameSession gameSession) {
     this.beingRemoved = false;
-
+    this.gameSession = gameSession;
     this.gameActive = true;
-    this.generator = new PlaylistGenerator();
+    String playOption = this.gameSession.getPlaylistOption();
+    if (playOption.equals("None")) {
+      this.generator = new PlaylistGenerator();
+    } else {
+      this.generator = new SpotifyPlaylistGenerator(playOption);
+    }
+
     this.players = gameSession.getUsersInSession();
     this.numSongsPerPlayer = gameSession.getNumberSongs();
-    this.gameSession = gameSession;
+
     this.turn = (new Random()).nextInt(1000) % this.players.size();
     this.totalTurns = Constants.TURN_COUNT_START;
     this.score = new ArrayList<Integer>(Collections.nCopies(this.players.size(), 0));
@@ -67,17 +74,20 @@ public class GuessTheSongGame implements Game {
   }
 
   /**
-   * Our program's main algorithm. The playlist generating algorithm obtains the
-   * top songs and artists of all players in the game and assigns weights to them
-   * based on the difficulty of the game. It then returns lists of playlists. This
-   * method produces all of the needed playlists with the exact number of songs
-   * needed for a full game.
+   * Our program's main algorithm. The playlist generating
+   * algorithm obtains the top songs and artists of all
+   * players in the game and assigns weights to them based on
+   * the difficulty of the game. It then returns lists of
+   * playlists. This method produces all of the needed
+   * playlists with the exact number of songs needed for a
+   * full game.
    *
-   * @return A list of Playlists, one of which will be used for gameplay based on
-   *         chosen difficulty
+   * @return A list of Playlists, one of which will be used
+   *         for gameplay based on chosen difficulty
    */
   public List<Playlist> generatePlaylists() {
-    List<Playlist> playlists = this.generator.generate(this.players, this.numSongsPerPlayer);
+    List<Playlist> playlists = this.generator.generate(this.players,
+        this.numSongsPerPlayer);
     return playlists;
   }
 
@@ -98,7 +108,8 @@ public class GuessTheSongGame implements Game {
   /**
    * Getter method for scores of players in the game.
    *
-   * @return List of Integers pertaining to scores for each User.
+   * @return List of Integers pertaining to scores for each
+   *         User.
    */
   public List<Integer> getScores() {
     return this.score;
@@ -111,12 +122,12 @@ public class GuessTheSongGame implements Game {
    */
   public Playlist getCurrentPlaylist() {
     switch (this.level) {
-      case "hard":
-        return this.hard;
-      case "medium":
-        return this.medium;
-      default:
-        return this.easy;
+    case "hard":
+      return this.hard;
+    case "medium":
+      return this.medium;
+    default:
+      return this.easy;
     }
   }
 
@@ -154,7 +165,8 @@ public class GuessTheSongGame implements Game {
   }
 
   /**
-   * Sets the score for a particular player to be a certain value.
+   * Sets the score for a particular player to be a certain
+   * value.
    *
    * @param player   User whose score we are changing
    * @param newScore Integer value of their new score
@@ -248,8 +260,8 @@ public class GuessTheSongGame implements Game {
     }
     // Builds a list of sorted (nickname, score) pairs
     List<List<String>> sorted = scores.entrySet().stream()
-        .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-        .map(x -> Arrays.asList(users.get(x.getKey()).getNickname(), x.getValue().toString()))
+        .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).map(x -> Arrays
+            .asList(users.get(x.getKey()).getNickname(), x.getValue().toString()))
         .collect(Collectors.toList());
     this.sortedUsers = sorted;
     return sorted;
@@ -257,15 +269,17 @@ public class GuessTheSongGame implements Game {
 
   @Override
   public boolean userGuess(String userInput) {
-    // NOTE: Cannot call nextTurn before checking the guess since this uses the
+    // NOTE: Cannot call nextTurn before checking the guess
+    // since this uses the
     // current
     // track to check to see if the user input is correct
     this.guess = userInput;
     Track currTrack = this.getCurrentTrack();
+    System.out.println("Track: \n" + currTrack.toString());
     List<String> validNames = currTrack.getCleanNames();
     User player = this.currentPlayer();
     for (String name : validNames) {
-      if (getLedDistance(userInput.toLowerCase(), name) <= 1) {
+      if (this.getLedDistance(userInput.toLowerCase(), name) <= 1) {
         this.incrementPlayerScore(player);
         return true;
       }
@@ -274,11 +288,12 @@ public class GuessTheSongGame implements Game {
   }
 
   /**
-   * Creates a LED distance metric for words inputted, so we can implement an
-   * autocorrecting function on song guesses.
+   * Creates a LED distance metric for words inputted, so we
+   * can implement an autocorrecting function on song guesses.
    *
    * @param word1 String pertaining to word to be compared
    * @param word2 String pertaining to word to be compared
+   *
    * @return Int pertaining to LED distance
    */
   public int getLedDistance(String word1, String word2) {
@@ -296,13 +311,15 @@ public class GuessTheSongGame implements Game {
           ledMatrix[i][j] = i;
         } else {
 
-          // See if adding corresponding characters would not increase led.
+          // See if adding corresponding characters would not increase
+          // led.
           int substitution = 1;
           if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
             substitution = 0;
           }
           // Take min of insertion, deletion, substituion.
-          ledMatrix[i][j] = Math.min(Math.min(ledMatrix[i][j - 1] + 1, ledMatrix[i - 1][j] + 1),
+          ledMatrix[i][j] = Math.min(
+              Math.min(ledMatrix[i][j - 1] + 1, ledMatrix[i - 1][j] + 1),
               ledMatrix[i - 1][j - 1] + substitution);
         }
       }
@@ -328,13 +345,7 @@ public class GuessTheSongGame implements Game {
       }
       List<Playlist> playlists = this.generatePlaylists();
       this.easy = playlists.get(0);
-      for (Track t : this.easy.getTracks()) {
-        System.out.println(t.toString());
-      }
       this.medium = playlists.get(1);
-      for (Track t : this.medium.getTracks()) {
-        System.out.println(t.toString());
-      }
       this.hard = playlists.get(2);
       String hostId = this.gameSession.getHost().getId();
       String gameCode = this.gameSession.getGameCode();

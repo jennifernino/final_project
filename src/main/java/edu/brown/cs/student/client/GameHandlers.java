@@ -15,16 +15,16 @@ import edu.brown.cs.student.sonicSkillz.gameunits.GameSession;
 import edu.brown.cs.student.sonicSkillz.gameunits.User;
 
 /**
- * Class that manages all game information (sessions, users, game instances).
+ * Class that manages all game information (sessions, users,
+ * game instances).
  */
-public class GameHandlers {
+public class GameHandlers
+{
 
   protected static final Map<String, Game> codeToGameInstance = new ConcurrentHashMap<>();
   protected static final Map<String, User> userIdToUser = new ConcurrentHashMap<>();
   protected static final Map<String, GameSession> gameCodeToGameSession = new ConcurrentHashMap<>();
   protected static final Queue<String> usedIds = new ConcurrentLinkedQueue<>();
-  // protected static final Map<User, String> userToGameCode = new
-  // ConcurrentHashMap<>();
 
   /**
    * Create a unique user id
@@ -32,11 +32,13 @@ public class GameHandlers {
    * @return the unique id
    */
   public static String creatUniqueRandomId() {
-    String random = Integer.toString(
-        ThreadLocalRandom.current().nextInt(0, Constants.KEEP_WITHIN) + Constants.USER_ID_START);
+    String random = Integer
+        .toString(ThreadLocalRandom.current().nextInt(0, Constants.KEEP_WITHIN)
+            + Constants.USER_ID_START);
     while (usedIds.contains(random)) {
-      random = Integer.toString(
-          ThreadLocalRandom.current().nextInt(0, Constants.KEEP_WITHIN) + Constants.USER_ID_START);
+      random = Integer
+          .toString(ThreadLocalRandom.current().nextInt(0, Constants.KEEP_WITHIN)
+              + Constants.USER_ID_START);
     }
     usedIds.add(random);
     return random;
@@ -48,12 +50,13 @@ public class GameHandlers {
    * @return the unique code
    */
   public static String creatUniqueRandomCode() {
-    String gameCode = Integer.toString(
-        (int) (Math.floor(Math.random() * Constants.KEEP_WITHIN) + Constants.GAME_CODE_START));
+    String gameCode = Integer
+        .toString((int) (Math.floor(Math.random() * Constants.KEEP_WITHIN)
+            + Constants.GAME_CODE_START));
 
     while (gameCodeToGameSession.containsKey(gameCode)) {
-      gameCode = Integer.toString(
-          (int) (Math.floor(Math.random() * Constants.KEEP_WITHIN) + Constants.GAME_CODE_START));
+      gameCode = Integer.toString((int) (Math.floor(Math.random() * Constants.KEEP_WITHIN)
+          + Constants.GAME_CODE_START));
     }
 
     return gameCode;
@@ -65,11 +68,14 @@ public class GameHandlers {
    * @param hostId      of the user
    * @param nickname    of the user
    * @param numberSongs each user should get in the game
+   * 
    * @return the gamesession object after creation
    */
-  public static GameSession createGameSession(String hostId, String nickname, int numberSongs) {
+  public static GameSession createGameSession(String hostId, String nickname,
+      int numberSongs) {
     String gameCode = creatUniqueRandomCode();
-
+    System.out.println("HostID: " + hostId);
+    System.out.println("User ID contains: " + userIdToUser.containsKey(hostId));
     User host = userIdToUser.get(hostId);
     userIdToUser.get(hostId).setGameCode(gameCode);
     userIdToUser.get(hostId).setNickname(nickname);
@@ -97,8 +103,8 @@ public class GameHandlers {
   /**
    * Initializes the existence of the game.
    *
-   * @param session the game session that wants to initialize a game
-   *
+   * @param session the game session that wants to initialize
+   *                a game
    */
   public static void initGame(GameSession session) {
     // Locks the game such that no additional users can be added
@@ -114,7 +120,8 @@ public class GameHandlers {
    * Removes a user from a session.
    *
    * @param userId   the userId of the user to remove
-   * @param gameCode the gamecode of the session to remove from
+   * @param gameCode the gamecode of the session to remove
+   *                 from
    */
   public static void removeUser(String userId, String gameCode) {
     System.out.println("Removing user herre!! in gamehadnler & userNickname is:"
@@ -128,8 +135,8 @@ public class GameHandlers {
   }
 
   /**
-   * Removes a game from our program, this should include session and game
-   * instance.
+   * Removes a game from our program, this should include
+   * session and game instance.
    *
    * @param gameCode of the game to remove from our program
    */
@@ -170,8 +177,8 @@ public class GameHandlers {
   }
 
   /**
-   * If a user is on a homepage and they have a gamecode, we need to cleanup the
-   * game if necessary.
+   * If a user is on a homepage and they have a gamecode, we
+   * need to cleanup the game if necessary.
    *
    * @param userId   of the user who needs cleaning
    * @param gameCode of the session they are tied to
@@ -223,7 +230,8 @@ public class GameHandlers {
             if (!hostId.equals(userId)) {
               removeUser(userId, gameCode);
 
-              // Force users to see new members (it shouldn't include the user we just
+              // Force users to see new members (it shouldn't include the
+              // user we just
               // removed)!
               WebSocketHandlers.replyNewMember(gameCode, userId);
             } else {

@@ -1,13 +1,21 @@
 package edu.brown.cs.student.client;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
 
+import edu.brown.cs.student.database.SpotifyDatabase;
 import edu.brown.cs.student.sonicSkillz.Game;
 import edu.brown.cs.student.sonicSkillz.gameunits.GameSession;
+import edu.brown.cs.student.sonicSkillz.gameunits.SpotifyPlaylist;
+import edu.brown.cs.student.sonicSkillz.gameunits.SpotifyPlaylistComparator;
 import edu.brown.cs.student.sonicSkillz.gameunits.Track;
 import edu.brown.cs.student.sonicSkillz.gameunits.User;
 import spark.ExceptionHandler;
@@ -18,9 +26,9 @@ import spark.TemplateViewRoute;
 
 /**
  * Class for GUIHandlers.
- *
  */
-public final class GUIHandlers {
+public final class GUIHandlers
+{
   /**
    * Constructor for GUIHandlers.
    */
@@ -29,13 +37,13 @@ public final class GUIHandlers {
 
   /**
    * Displays the homepage of our application.
-   *
    */
-  protected static class HomepageHandler implements TemplateViewRoute {
+  protected static class HomepageHandler implements TemplateViewRoute
+  {
     @Override
     public ModelAndView handle(Request request, Response res) {
-      Map<String, Object> variables = ImmutableMap.of("title", "Sonic Skillz", "showScoreboard",
-          false);
+      Map<String, Object> variables = ImmutableMap.of("title", "Sonic Skillz",
+          "showScoreboard", false);
       String userId = request.cookies().get("userID");
       String gameCode = request.cookies().get("gameCode");
       // TODO: Check
@@ -56,13 +64,13 @@ public final class GUIHandlers {
 
   /**
    * Displays after a user chooses to play guess the song.
-   *
    */
-  protected static class GuessTheSongHandler implements TemplateViewRoute {
+  protected static class GuessTheSongHandler implements TemplateViewRoute
+  {
     @Override
     public ModelAndView handle(Request request, Response res) {
-      Map<String, Object> variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard",
-          false);
+      Map<String, Object> variables = ImmutableMap.of("title", "Guess the Song",
+          "showScoreboard", false);
 
       return new ModelAndView(variables, "GTSHome.ftl");
     }
@@ -70,13 +78,13 @@ public final class GUIHandlers {
 
   /**
    * Displays after a user chooses to start a new session.
-   *
    */
-  protected static class GTSNewSessionHandler implements TemplateViewRoute {
+  protected static class GTSNewSessionHandler implements TemplateViewRoute
+  {
     @Override
     public ModelAndView handle(Request request, Response res) {
-      Map<String, Object> variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard",
-          false);
+      Map<String, Object> variables = ImmutableMap.of("title", "Guess the Song",
+          "showScoreboard", false);
 
       return new ModelAndView(variables, "NewSession.ftl");
     }
@@ -85,68 +93,72 @@ public final class GUIHandlers {
   /**
    * Displays after a user chooses to join a session.
    */
-  protected static class GTSTryJoinSessionHandler implements TemplateViewRoute {
+  protected static class GTSTryJoinSessionHandler implements TemplateViewRoute
+  {
     @Override
     public ModelAndView handle(Request request, Response res) {
-      Map<String, Object> variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard",
-          false);
+      Map<String, Object> variables = ImmutableMap.of("title", "Guess the Song",
+          "showScoreboard", false);
       return new ModelAndView(variables, "JoinSession.ftl");
 
     }
   }
 
   /**
-   * Handles all error-ing on the front end of the application by catching
-   * potential things that can go wrong and displaying the error on the screen.
-   *
+   * Handles all error-ing on the front end of the application
+   * by catching potential things that can go wrong and
+   * displaying the error on the screen.
    */
-  protected static class GTSGeneralError implements TemplateViewRoute {
+  protected static class GTSGeneralError implements TemplateViewRoute
+  {
     @Override
     public ModelAndView handle(Request request, Response res) {
       String error = request.params(":error");
       System.out.println(error);
       Map<String, Object> variables;
       switch (error) {
-        case "unf":
-          variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false, "error",
-              "Unable to find user id.");
-          break;
-        case "gcnf":
-          variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false, "error",
-              "Unable to find game code.");
-          break;
-        case "pnf":
-          variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false, "error",
-              "Page not found.");
-          break;
-        case "gnf":
-          variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false, "error",
-              "Game not found.");
-          break;
-        case "ie":
-          variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false, "error",
-              "Internal error. Please try again.");
-          break;
-        case "dna":
-          variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false, "error",
-              "User did not authenticate, you need to authenticate.");
-          break;
-        case "aig":
-          variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false, "error",
-              "User is already in another game. Must wait for it to finish before you can begin a new one.");
-          break;
-        case "uls":
-          variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false, "error",
-              "A user has left your game, the game is being ended. Please do not leave the game when it has begun.");
-          break;
-        case "hls":
-          variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false, "error",
-              "The host has left the session. Feel free to create a new game.");
-          break;
-        default:
-          variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false, "error",
-              "Issue with Guess the Song game. Please try again.");
-          break;
+      case "unf":
+        variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false,
+            "error", "Unable to find user id.");
+        break;
+      case "gcnf":
+        variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false,
+            "error", "Unable to find game code.");
+        break;
+      case "pnf":
+        variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false,
+            "error", "Page not found.");
+        break;
+      case "gnf":
+        variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false,
+            "error", "Game not found.");
+        break;
+      case "ie":
+        variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false,
+            "error", "Internal error. Please try again.");
+        break;
+      case "dna":
+        variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false,
+            "error", "User did not authenticate, you need to authenticate.");
+        break;
+      case "aig":
+        variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false,
+            "error",
+            "User is already in another game. Must wait for it to finish before you can begin a new one.");
+        break;
+      case "uls":
+        variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false,
+            "error",
+            "A user has left your game, the game is being ended. Please do not leave the game when it has begun.");
+        break;
+      case "hls":
+        variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false,
+            "error", "The host has left the session. Feel free to create a new game.");
+        break;
+      default:
+        variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false,
+            "error", "Issue with Guess the Song game. Please try again.");
+        break;
       }
       return new ModelAndView(variables, "HomeError.ftl");
     }
@@ -155,32 +167,35 @@ public final class GUIHandlers {
   /**
    * Displays after a user chooses to join a session.
    */
-  protected static class GTSErrorJoinSessionHandler implements TemplateViewRoute {
+  protected static class GTSErrorJoinSessionHandler implements TemplateViewRoute
+  {
     @Override
     public ModelAndView handle(Request request, Response res) {
       String error = request.params(":error");
       System.out.println(error);
       Map<String, Object> variables;
       switch (error) {
-        case "dne":
-          variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false, "error",
-              "Unable to find session id.");
-          break;
-        case "locked":
-          variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false, "error",
-              "Unable to join game. That session already started.");
-          break;
-        case "exists":
-          variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false, "error",
-              "Unable to join game. Nickname already being used. Please choose another.");
-          break;
-        case "max":
-          variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false, "error",
-              "Unable to join game. Max number of players reached in this game session.");
-        default:
-          variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false, "error",
-              "Issue joining game. Please try again.");
-          break;
+      case "dne":
+        variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false,
+            "error", "Unable to find session id.");
+        break;
+      case "locked":
+        variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false,
+            "error", "Unable to join game. That session already started.");
+        break;
+      case "exists":
+        variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false,
+            "error",
+            "Unable to join game. Nickname already being used. Please choose another.");
+        break;
+      case "max":
+        variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false,
+            "error",
+            "Unable to join game. Max number of players reached in this game session.");
+      default:
+        variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard", false,
+            "error", "Issue joining game. Please try again.");
+        break;
       }
       return new ModelAndView(variables, "JoinSessionError.ftl");
 
@@ -190,11 +205,13 @@ public final class GUIHandlers {
   /**
    * Gets the waiting room with GETS.
    */
-  protected static class GTSGetWaitingRoom implements TemplateViewRoute {
+  protected static class GTSGetWaitingRoom implements TemplateViewRoute
+  {
     @Override
     public ModelAndView handle(Request request, Response res) {
       System.out.println("In GTSGetWaitingRoom");
       String userId = request.cookies().get("userID");
+      User user = GameHandlers.userIdToUser.get(userId);
       String gameCode = request.cookies().get("gameCode");
       if (userId == null || !GameHandlers.userIdToUser.containsKey(userId)) {
         res.redirect("/error/unf");
@@ -207,19 +224,41 @@ public final class GUIHandlers {
         res.redirect("/error/gcnf");
         return null;
       }
+      List<List<String>> nameIdTups = new ArrayList<>();
+      if (isHost) {
+        // get list of playlists
+        Set<SpotifyPlaylist> playlists = new HashSet<>();
+        try {
+          playlists = SpotifyDatabase.getSetOfSpotifyPlaylists(user);
+        } catch (IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+
+        // TODO: Get Playlists
+        List<SpotifyPlaylist> sortedPlaylists = playlists.stream()
+            .collect(Collectors.toList());
+        sortedPlaylists.sort(new SpotifyPlaylistComparator());
+
+        for (SpotifyPlaylist playlist : sortedPlaylists) {
+          List<String> tuple = Arrays.asList(playlist.getName(), playlist.getId());
+          nameIdTups.add(tuple);
+        }
+      }
       System.out.println("GameCode:" + gameCode);
       GameSession session = GameHandlers.gameCodeToGameSession.get(gameCode);
       System.out.println("Session: ");
       System.out.println(session);
       int userCount = session.getUsersInSession().size();
       String hostNickname = session.getHost().getNickname();
-      List<String> memberNicknames = session.getUsersInSession().stream().map(u -> u.getNickname())
-          .collect(Collectors.toList());
+      List<String> memberNicknames = session.getUsersInSession().stream()
+          .map(u -> u.getNickname()).collect(Collectors.toList());
 
       Map<String, Object> variables = ImmutableMap.<String, Object>builder()
-          .put("title", "Sonic Skillz").put("showScoreboard", false).put("host", hostNickname)
-          .put("isHost", isHost).put("members", memberNicknames).put("code", gameCode)
-          .put("userCount", userCount).build();
+          .put("title", "Sonic Skillz").put("showScoreboard", false)
+          .put("host", hostNickname).put("isHost", isHost).put("members", memberNicknames)
+          .put("code", gameCode).put("userCount", userCount)
+          .put("playlistTups", nameIdTups).build();
 
       return new ModelAndView(variables, "WaitingRoom.ftl");
     }
@@ -227,54 +266,83 @@ public final class GUIHandlers {
 
   /**
    * Displays the GET creating game.
-   *
    */
-  protected static class GTSGetStartGameHandler implements TemplateViewRoute {
+  protected static class GTSGetStartGameHandler implements TemplateViewRoute
+  {
     @Override
     public ModelAndView handle(Request request, Response res) {
       // TODO Error check here?
-      Map<String, Object> variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard",
-          false);
+      Map<String, Object> variables = ImmutableMap.of("title", "Guess the Song",
+          "showScoreboard", false);
       return new ModelAndView(variables, "Instructions.ftl");
 
     }
   }
 
   /**
-   * Handles screen when game is ready to play - allows host to start the game.
-   *
+   * Handles screen when game is ready to play - allows host
+   * to start the game.
    */
-  protected static class GTSGameReady implements TemplateViewRoute {
+  protected static class GTSGameReady implements TemplateViewRoute
+  {
     @Override
     public ModelAndView handle(Request request, Response res) {
       String userId = request.cookies().get("userID");
+
       String gameCode = request.cookies().get("gameCode");
       if (userId == null || !GameHandlers.userIdToUser.containsKey(userId)) {
         res.redirect("/error/unf");
         return null;
-      } else if (gameCode == null || !GameHandlers.gameCodeToGameSession.containsKey(gameCode)) {
+      } else if (gameCode == null
+          || !GameHandlers.gameCodeToGameSession.containsKey(gameCode)) {
         res.redirect("/error/gcnf");
         return null;
       }
 
       res.cookie("gameCode", gameCode);
+      GameSession session = GameHandlers.gameCodeToGameSession.get(gameCode);
+      User user = GameHandlers.userIdToUser.get(userId);
+      String playlistOption = session.getPlaylistOption();
+      String playlistName = "";
+      String imageUrl = "";
+      boolean hasPlaylistOption = false;
+      // TODO: Fix below
+      if (!playlistOption.equals("None")) {
+        SpotifyPlaylist playlist;
+        try {
+          playlist = SpotifyDatabase.getSpotifyPlaylist(playlistOption,
+              user.getApiAccessToken());
+          playlistName = playlist.getName();
+          imageUrl = playlist.getImage_url();
+          System.out.print("imageUrl is ");
+          System.out.println(imageUrl);
+
+          hasPlaylistOption = true;
+        } catch (IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+      }
 
       // Get variables to use for page
       GameSession gameSession = GameHandlers.gameCodeToGameSession.get(gameCode);
       User host = gameSession.getHost();
       boolean isHost = userId.equals(host.getId());
 
-      Map<String, Object> variables = ImmutableMap.of("title", "Guess the Song", "showScoreboard",
-          false, "isHost", isHost);
+      Map<String, Object> variables = ImmutableMap.<String, Object>builder()
+          .put("title", "Guess the Song").put("showScoreboard", false)
+          .put("isHost", isHost).put("playOption", hasPlaylistOption)
+          .put("playlist", playlistName).put("imageUrl", imageUrl).build();
       return new ModelAndView(variables, "GameReady.ftl");
     }
   }
 
   /**
-   * Handles the display of the opening page once user chooses the game.
-   *
+   * Handles the display of the opening page once user chooses
+   * the game.
    */
-  protected static class GTSWelcomePage implements TemplateViewRoute {
+  protected static class GTSWelcomePage implements TemplateViewRoute
+  {
 
     @Override
     public ModelAndView handle(Request request, Response res) throws Exception {
@@ -284,9 +352,30 @@ public final class GUIHandlers {
       if (userId == null || !GameHandlers.userIdToUser.containsKey(userId)) {
         res.redirect("/error/unf");
         return null;
-      } else if (gameCode == null || !GameHandlers.gameCodeToGameSession.containsKey(gameCode)) {
+      } else if (gameCode == null
+          || !GameHandlers.gameCodeToGameSession.containsKey(gameCode)) {
         res.redirect("/error/gcnf");
         return null;
+      }
+      GameSession session = GameHandlers.gameCodeToGameSession.get(gameCode);
+      User user = GameHandlers.userIdToUser.get(userId);
+      String playlistOption = session.getPlaylistOption();
+      String playlistName = "";
+      String imageUrl = "";
+      boolean hasPlaylistOption = false;
+      // TODO: Fix below
+      if (!playlistOption.equals("None")) {
+        SpotifyPlaylist playlist;
+        try {
+          playlist = SpotifyDatabase.getSpotifyPlaylist(playlistOption,
+              user.getApiAccessToken());
+          playlistName = playlist.getName();
+          imageUrl = playlist.getImage_url();
+          hasPlaylistOption = true;
+        } catch (IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
       }
 
       // Get variables to use for page
@@ -298,17 +387,19 @@ public final class GUIHandlers {
 
       Map<String, Object> variables = ImmutableMap.<String, Object>builder()
           .put("title", "Guess the Song").put("showScoreboard", false).put("level", level)
-          .put("firstPlayer", nextNickname).put("isNextPlayer", isNextPlayer).build();
+          .put("firstPlayer", nextNickname).put("isNextPlayer", isNextPlayer)
+          .put("playOption", hasPlaylistOption).put("playlist", playlistName)
+          .put("imageUrl", imageUrl).build();
       return new ModelAndView(variables, "Welcome.ftl");
     }
   }
 
   /**
-   * Handles displays for the player whose turn it is next and for the other
-   * players.
-   *
+   * Handles displays for the player whose turn it is next and
+   * for the other players.
    */
-  protected static class GTSNextRound implements TemplateViewRoute {
+  protected static class GTSNextRound implements TemplateViewRoute
+  {
 
     @Override
     public ModelAndView handle(Request request, Response res) throws Exception {
@@ -317,7 +408,8 @@ public final class GUIHandlers {
       if (userId == null || !GameHandlers.userIdToUser.containsKey(userId)) {
         res.redirect("/error/unf");
         return null;
-      } else if (gameCode == null || !GameHandlers.codeToGameInstance.containsKey(gameCode)) {
+      } else if (gameCode == null
+          || !GameHandlers.codeToGameInstance.containsKey(gameCode)) {
         res.redirect("/error/gcnf");
         return null;
       }
@@ -334,8 +426,9 @@ public final class GUIHandlers {
       String link = track.getPreviewUrl();
       String album = track.getImageURL();
 
-      ImmutableMap.Builder<String, Object> vBuilder = ImmutableMap.<String, Object>builder()
-          .put("title", "Guess the Song").put("audioLink", link);
+      ImmutableMap.Builder<String, Object> vBuilder = ImmutableMap
+          .<String, Object>builder().put("title", "Guess the Song")
+          .put("audioLink", link);
 
       if (yourTurn) { // Your turn
         if (nextPlayer == null) {
@@ -343,7 +436,8 @@ public final class GUIHandlers {
           vBuilder.put("showScoreboard", false).build();
         } else {
           // Need next player info and score board
-          vBuilder.put("showScoreboard", true).put("nextNickname", nextPlayer.getNickname())
+          vBuilder.put("showScoreboard", true)
+              .put("nextNickname", nextPlayer.getNickname())
               .put("nextScore", game.getPlayerScore(nextPlayer));
         }
         return new ModelAndView(vBuilder.build(), "YourTurn.ftl");
@@ -354,7 +448,8 @@ public final class GUIHandlers {
           // No next player to show or score board
           vBuilder.put("showScoreboard", false);
         } else {
-          vBuilder.put("showScoreboard", true).put("nextNickname", nextPlayer.getNickname())
+          vBuilder.put("showScoreboard", true)
+              .put("nextNickname", nextPlayer.getNickname())
               .put("nextScore", game.getPlayerScore(nextPlayer));
         }
         return new ModelAndView(vBuilder.build(), "OtherTurn.ftl");
@@ -363,10 +458,11 @@ public final class GUIHandlers {
   }
 
   /**
-   * Handles the display of the scoreboard for all players in the game.
-   *
+   * Handles the display of the scoreboard for all players in
+   * the game.
    */
-  protected static class GTSScoreBoard implements TemplateViewRoute {
+  protected static class GTSScoreBoard implements TemplateViewRoute
+  {
     @Override
     public ModelAndView handle(Request request, Response res) throws Exception {
       // Show scoreboard
@@ -377,7 +473,8 @@ public final class GUIHandlers {
       if (userId == null || !GameHandlers.userIdToUser.containsKey(userId)) {
         res.redirect("/error/unf");
         return null;
-      } else if (gameCode == null || !GameHandlers.codeToGameInstance.containsKey(gameCode)) {
+      } else if (gameCode == null
+          || !GameHandlers.codeToGameInstance.containsKey(gameCode)) {
         res.redirect("/error/gcnf");
         return null;
       }
@@ -391,14 +488,15 @@ public final class GUIHandlers {
       String imageUrl = track.getImages().get(0).getUrl();
       String audioLink = track.getPreviewUrl();
       String songName = track.getName();
-      String artists = String.join(", ",
-          track.getArtists().stream().map(artist -> artist.getName()).collect(Collectors.toList()));
+      String artists = String.join(", ", track.getArtists().stream()
+          .map(artist -> artist.getName()).collect(Collectors.toList()));
 
       User nextPlayer = game.nextTurnPeek();
 
-      ImmutableMap.Builder<String, Object> vBuilder = ImmutableMap.<String, Object>builder()
-          .put("title", "Guess the Song").put("imageUrl", imageUrl).put("audioLink", audioLink)
-          .put("guess", guess).put("result", result).put("currentPlayer", currentPlayerName)
+      ImmutableMap.Builder<String, Object> vBuilder = ImmutableMap
+          .<String, Object>builder().put("title", "Guess the Song")
+          .put("imageUrl", imageUrl).put("audioLink", audioLink).put("guess", guess)
+          .put("result", result).put("currentPlayer", currentPlayerName)
           .put("songName", songName).put("artist", artists);
 
       if (nextPlayer == null) {
@@ -421,9 +519,9 @@ public final class GUIHandlers {
 
   /**
    * Displays after a game ends.
-   *
    */
-  protected static class GTSFinalScore implements TemplateViewRoute {
+  protected static class GTSFinalScore implements TemplateViewRoute
+  {
     @Override
     public ModelAndView handle(Request request, Response res) {
       String gameCode = request.cookies().get("gameCode");
@@ -443,8 +541,8 @@ public final class GUIHandlers {
 
       Game game = GameHandlers.codeToGameInstance.get(gameCode);
 
-      if (game.getTotalTurns() < ((game.getPlayerCount() * game.getGameSession().getNumberSongs())
-          - 1)) {
+      if (game.getTotalTurns() < ((game.getPlayerCount()
+          * game.getGameSession().getNumberSongs()) - 1)) {
         res.redirect("/guess-the-song/game-round");
         return null;
       }
@@ -459,17 +557,18 @@ public final class GUIHandlers {
           .collect(Collectors.toList());
 
       Map<String, Object> variables = ImmutableMap.<String, Object>builder()
-          .put("title", "Guess the Song").put("showScoreboard", false).put("winners", winners)
-          .put("others", rest).build();
+          .put("title", "Guess the Song").put("showScoreboard", false)
+          .put("winners", winners).put("others", rest).build();
       return new ModelAndView(variables, "FinalScore.ftl");
     }
   }
 
   /**
-   * Display an error page when an exception occurs in the server.
-   *
+   * Display an error page when an exception occurs in the
+   * server.
    */
-  protected static class ExceptionPrinter implements ExceptionHandler {
+  protected static class ExceptionPrinter implements ExceptionHandler
+  {
     @Override
     public void handle(Exception e, Request req, Response res) {
       e.printStackTrace();
@@ -479,14 +578,14 @@ public final class GUIHandlers {
 
   /**
    * Display when a page is not found.
-   *
    */
-  protected static class NotFoundHandler implements TemplateViewRoute {
+  protected static class NotFoundHandler implements TemplateViewRoute
+  {
     @Override
     public ModelAndView handle(Request req, Response res) throws Exception {
       // TODO Auto-generated method stub
-      Map<String, Object> variables = ImmutableMap.of("title", "Sonic Skillz", "showScoreboard",
-          false);
+      Map<String, Object> variables = ImmutableMap.of("title", "Sonic Skillz",
+          "showScoreboard", false);
       return new ModelAndView(variables, "PageNotFound.ftl");
     }
   }

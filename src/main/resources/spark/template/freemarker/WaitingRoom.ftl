@@ -22,9 +22,28 @@
 				</p>
 				<button type="button" class="button is-primary" id="copyCode" onclick="copy()"><i id="copy-icon" class="fas fa-copy"></i>Copy</button>
 			</div>
-
+			<div class="form-group control">
+				<label class="inputlabel form-label" for="playlistOption">Playlist:</label>
+				<div class="inputbox control has-icons-left">
+					<div id="dropSelect" class="select">
+						<select id="playlistOption" name="playlistOption">
+							<option value="None">Personal Playlist</option>
+							<#list playlistTups>
+								<#items as item>
+								<option value=${item[1]}>${item[0]}</option>
+								</#items>
+							</#list>
+						</select>
+					</div>
+					<div class="icon is-small is-left">
+						<i class="fas fa-music"></i>
+					</div>
+				</div>
+			</div>
 			<input id='start-new-session' type="submit" class="button is-primary" value="Start Game">
 		</form>
+
+
 	  <#else>
 		<div class="form-group side-by-side">
 			<p id="copy-clip" class="control has-icons-left">

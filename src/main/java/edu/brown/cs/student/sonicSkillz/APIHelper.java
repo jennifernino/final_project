@@ -18,78 +18,124 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import edu.brown.cs.student.Constants;
+import edu.brown.cs.student.database.SpotifyDatabase;
 import edu.brown.cs.student.sonicSkillz.gameunits.Artist;
 import edu.brown.cs.student.sonicSkillz.gameunits.Image;
+import edu.brown.cs.student.sonicSkillz.gameunits.SpotifyPlaylist;
 import edu.brown.cs.student.sonicSkillz.gameunits.Track;
 import edu.brown.cs.student.sonicSkillz.gameunits.User;
 
 /**
- * Accesses the Spotify API and converts JSON objects from the API into Java
- * objects that we can use within our program. These fields are cached with
- * Databases or with Google Guava Caches depending on permanence.
- *
+ * Accesses the Spotify API and converts JSON objects from
+ * the API into Java objects that we can use within our
+ * program. These fields are cached with Databases or with
+ * Google Guava Caches depending on permanence.
  */
-public class APIHelper {
+public class APIHelper
+{
+
+  public List<SpotifyPlaylist> getAllSpotifyPlaylists(String token) throws IOException {
+    // check if access token expired
+
+    String accessToken = token;
+    String userId = "spotify";
+    String request = "https://api.spotify.com/v1/users/" + userId
+        + "/playlists?limit=50&offset=";
+    int offset = 0;
+    boolean allPlaylistsRetrieved = false;
+    List<SpotifyPlaylist> playlists = new ArrayList<SpotifyPlaylist>();
+    while (!allPlaylistsRetrieved) {
+
+      JsonObject result = this.getRequest(accessToken,
+          request + Integer.toString(offset)); // GET request
+      if (result.has("SONIC_SKILLZ_ERROR")) {
+        System.err.println("ERROR: getUserArtists failed.");
+        return null;
+      }
+      JsonArray items = result.getAsJsonArray("items");
+      System.out
+          .println("Playlists retrieved: " + Integer.toString((items.size() + offset)));
+      if (items.size() < 50) {
+        System.out.println("Done getting items");
+        allPlaylistsRetrieved = true;
+      }
+      if (items.size() == 0) {
+        continue;
+      }
+
+      playlists.addAll(this.parseSpotifyPlaylists(items, token));
+      offset += 50;
+    }
+
+    return playlists;
+  }
 
   /**
-   * Given a User, queries Spotify API to retrieve a ranked list of their
-   * top-played artists, parses into Artist objects, and sets the user's
-   * "topArtists" property to this list. Ranking is determined by Spotify API and
-   * formula is not public, but takes in at least time (the more recent the
-   * higher) and frequency (the more frequent the higher) as factors.
+   * Given a User, queries Spotify API to retrieve a ranked
+   * list of their top-played artists, parses into Artist
+   * objects, and sets the user's "topArtists" property to
+   * this list. Ranking is determined by Spotify API and
+   * formula is not public, but takes in at least time (the
+   * more recent the higher) and frequency (the more frequent
+   * the higher) as factors.
    *
    * @param user the user we are finding top-played artists of
+   *
    * @return a list of the user's top artists
-   * @throws IOException if API request is rejected by Spotify server for whatever
-   *                     reason
+   *
+   * @throws IOException if API request is rejected by Spotify
+   *                     server for whatever reason
    */
 
   public List<Artist> getUserArtists(User user) throws IOException {
     // check if access token expired
-    if (isAccessExpired(user)) {
-      refreshAccessToken(user);
-      user.setApiAccessToken(refreshAccessToken(user));
+    if (this.isAccessExpired(user)) {
+      this.refreshAccessToken(user);
+      user.setApiAccessToken(this.refreshAccessToken(user));
     }
 
     String accessToken = user.getApiAccessToken();
     String request = "https://api.spotify.com/v1/me/top/artists?time_range=medium_term&limit"
         + "=50";
-    JsonObject result = getRequest(accessToken, request); // GET request
+    JsonObject result = this.getRequest(accessToken, request); // GET request
     if (result.has("SONIC_SKILLZ_ERROR")) {
       System.err.println("ERROR: getUserArtists failed.");
       return null;
     }
     JsonArray items = result.getAsJsonArray("items");
 
-    return parseArtists(items);
+    return this.parseArtists(items);
   }
 
   /**
-   * Gets a ranked list of top tracks for a given user as determined by the
-   * Spotify API.
+   * Gets a ranked list of top tracks for a given user as
+   * determined by the Spotify API.
    *
    * @param user user to find top tracks of
+   *
    * @return a list of user's top tracks
-   * @throws IOException if API request is rejected by Spotify server for whatever
-   *                     reason
+   *
+   * @throws IOException if API request is rejected by Spotify
+   *                     server for whatever reason
    */
   public List<Track> getUserTracks(User user) throws IOException {
     // check if access token expired
-    if (isAccessExpired(user)) {
-      user.setApiAccessToken(refreshAccessToken(user));
+    if (this.isAccessExpired(user)) {
+      user.setApiAccessToken(this.refreshAccessToken(user));
     }
     String accessToken = user.getApiAccessToken();
     String request = "https://api.spotify.com/v1/me/top/tracks?time_range=medium_term&limit=50";
-    JsonObject result = getRequest(accessToken, request); // GET request
+    JsonObject result = this.getRequest(accessToken, request); // GET request
     if (result.has("SONIC_SKILLZ_ERROR")) {
       System.err.println("ERROR: getUserTracks failed.");
       return null;
     }
     JsonArray items = result.getAsJsonArray("items");
-    List<Track> tracks = parseTracks(items);
+    List<Track> tracks = this.parseTracks(items);
     List<Track> filtered = new ArrayList<Track>();
     for (Track track : tracks) {
       if (track.getPreviewUrl() == null) {
@@ -102,43 +148,50 @@ public class APIHelper {
   }
 
   /**
-   * Gets a ranked list of up to 20 related artists for a given artist, as
-   * determined by the Spotify API. Rank is weighted by artist similarity and
-   * popularity, and possibly other factors (not public).
+   * Gets a ranked list of up to 20 related artists for a
+   * given artist, as determined by the Spotify API. Rank is
+   * weighted by artist similarity and popularity, and
+   * possibly other factors (not public).
    *
-   * @param user   user whose access token we will be using to access the API
-   *               request
-   * @param artist artist who we want to retrieve related artists of
+   * @param user   user whose access token we will be using to
+   *               access the API request
+   * @param artist artist who we want to retrieve related
+   *               artists of
+   *
    * @return a list of related artists
-   * @throws IOException if API request is rejected by Spotify server for whatever
-   *                     reason
+   *
+   * @throws IOException if API request is rejected by Spotify
+   *                     server for whatever reason
    */
   public List<Artist> getRelatedArtists(User user, Artist artist) throws IOException {
     // check if access token expired
-    if (isAccessExpired(user)) {
-      user.setApiAccessToken(refreshAccessToken(user));
+    if (this.isAccessExpired(user)) {
+      user.setApiAccessToken(this.refreshAccessToken(user));
     }
     String accessToken = user.getApiAccessToken();
     String artistId = artist.getId();
-    String request = "https://api.spotify.com/v1/artists/" + artistId + "/related-artists";
-    JsonObject result = getRequest(accessToken, request); // GET request
+    String request = "https://api.spotify.com/v1/artists/" + artistId
+        + "/related-artists";
+    JsonObject result = this.getRequest(accessToken, request); // GET request
     if (result.has("SONIC_SKILLZ_ERROR")) {
       System.err.println("ERROR: getRelatedArtists failed.");
       return null;
     }
     JsonArray artists = result.getAsJsonArray("artists");
-    return parseArtists(artists);
+    return this.parseArtists(artists);
   }
 
   /**
-   * Gets a ranked list of up to 10 top tracks for a given artist, as determined
-   * by the Spotify API.
+   * Gets a ranked list of up to 10 top tracks for a given
+   * artist, as determined by the Spotify API.
    *
    * @param user   user we are using access token of
    * @param artist artist to find tracks of
+   *
    * @return a list of tracks
-   * @throws IOException if API request is rejected by Spotify server for whatever
-   *                     reason
+   *
+   * @throws IOException if API request is rejected by Spotify
+   *                     server for whatever reason
    */
   public List<Track> getArtistTracks(User user, Artist artist) throws IOException {
     // check if the artist is in the cahce
@@ -147,22 +200,22 @@ public class APIHelper {
       return topTracks;
     }
     // check if access token expired
-    if (isAccessExpired(user)) {
-      user.setApiAccessToken(refreshAccessToken(user));
+    if (this.isAccessExpired(user)) {
+      user.setApiAccessToken(this.refreshAccessToken(user));
     }
     String accessToken = user.getApiAccessToken();
     String artistId = artist.getId();
-    String request = "https://api.spotify.com/v1/artists/" + artistId + "/top-tracks?country="
-        + Constants.SPOTIFY_MARKET;
-    JsonObject result = getRequest(accessToken, request); // GET request
+    String request = "https://api.spotify.com/v1/artists/" + artistId
+        + "/top-tracks?country=" + Constants.SPOTIFY_MARKET;
+    JsonObject result = this.getRequest(accessToken, request); // GET request
     if (result.has("SONIC_SKILLZ_ERROR")) {
       System.err.println("ERROR: getArtistTracks failed.");
       return null;
     }
     JsonArray tracksArr = result.getAsJsonArray("tracks");
-    List<Track> out = parseTracks(tracksArr);
+    List<Track> out = this.parseTracks(tracksArr);
 
-    List<Track> tracks = parseTracks(tracksArr);
+    List<Track> tracks = this.parseTracks(tracksArr);
     List<Track> filtered = new ArrayList<Track>();
     for (Track track : tracks) {
       if (track.getPreviewUrl() == null) {
@@ -181,28 +234,49 @@ public class APIHelper {
    * Gets all the tracks in a public Spotify playlist.
    *
    * @param user       user we are using access token of
-   * @param playlistId id of the playlist so we can request the songs from Spotify
+   * @param playlistId id of the playlist so we can request
+   *                   the songs from Spotify
+   *
    * @return list of tracks inside the playlist
-   * @throws IOException if API request is rejected by Spotify server for whatever
-   *                     reason
+   *
+   * @throws IOException if API request is rejected by Spotify
+   *                     server for whatever reason
    */
-  public List<Track> getSpotifyPlaylist(User user, String playlistId) throws IOException {
+  public SpotifyPlaylist getSpotifyPlaylist(String token, String playlistId)
+      throws IOException {
     // check if access token expired
-    if (isAccessExpired(user)) {
-      user.setApiAccessToken(refreshAccessToken(user));
-    }
-    String accessToken = user.getApiAccessToken();
-    String fields = "tracks.items(track(id,name,artists,uri,preview_url,popularity,duration_ms,"
+
+    String accessToken = token;
+    String fields = "description,uri,external_urls.spotify,name,owner.display_name,images.items(image(height,url,width)),tracks.items(track(id,name,artists,uri,preview_url,popularity,duration_ms,"
         + "album))";
     String market = Constants.SPOTIFY_MARKET;
-    String request = "https://api.spotify.com/v1/playlists/" + playlistId + "?" + "market=" + market
-        + "&fields=" + fields;
-    JsonObject result = getRequest(accessToken, request);
+    String request = "https://api.spotify.com/v1/playlists/" + playlistId + "?"
+        + "market=" + market + "&fields=" + fields;
+    JsonObject result = this.getRequest(accessToken, request);
     if (result.has("SONIC_SKILLZ_ERROR")) {
       System.err.println("ERROR: getArtistTracks failed.");
       return null;
     }
-    JsonArray itemsArr = result.get("tracks").getAsJsonObject().get("items").getAsJsonArray();
+    SpotifyPlaylist playlist = this.parseSpotifyPlaylist(result, accessToken, playlistId);
+    return playlist;
+  }
+
+  public List<Track> getSpotifyPlaylistTracks(String token, String playlistId)
+      throws IOException {
+    // check if access token expired
+
+    String fields = "tracks.items(track(id,name,artists,uri,preview_url,popularity,duration_ms,"
+        + "album))";
+    String market = Constants.SPOTIFY_MARKET;
+    String request = "https://api.spotify.com/v1/playlists/" + playlistId + "?"
+        + "market=" + market + "&fields=" + fields;
+    JsonObject result = this.getRequest(token, request);
+    if (result.has("SONIC_SKILLZ_ERROR")) {
+      System.err.println("ERROR: getArtistTracks failed.");
+      return null;
+    }
+    JsonArray itemsArr = result.get("tracks").getAsJsonObject().get("items")
+        .getAsJsonArray();
 
     // parse
     if (itemsArr.size() == 0) {
@@ -210,11 +284,13 @@ public class APIHelper {
     }
     List<Track> tracks = new ArrayList<>();
     for (int i = 0; i < itemsArr.size(); i++) { // for each item JSON object
-      JsonObject trackData = itemsArr.get(i).getAsJsonObject().get("track").getAsJsonObject();
+      JsonObject trackData = itemsArr.get(i).getAsJsonObject().get("track")
+          .getAsJsonObject();
       String jsonString = trackData.toString();
       // directly convert JSON into Java object
       Track track = new Gson().fromJson(jsonString, Track.class);
-      JsonArray imageArr = trackData.get("album").getAsJsonObject().get("images").getAsJsonArray();
+      JsonArray imageArr = trackData.get("album").getAsJsonObject().get("images")
+          .getAsJsonArray();
       // custom parsing for images
       List<Image> images = new ArrayList<>();
       for (int n = 0; n < imageArr.size(); n++) {
@@ -230,22 +306,24 @@ public class APIHelper {
   }
 
   /**
-   * Gets a link to download the user's Spotify profile image (JPEG), if
-   * available.
+   * Gets a link to download the user's Spotify profile image
+   * (JPEG), if available.
    *
    * @param user user
+   *
    * @return image download url
-   * @throws IOException if API request is rejected by Spotify server for whatever
-   *                     reason
+   *
+   * @throws IOException if API request is rejected by Spotify
+   *                     server for whatever reason
    */
   public String getUserImage(User user) throws IOException {
     // check if access token expired
-    if (isAccessExpired(user)) {
-      user.setApiAccessToken(refreshAccessToken(user));
+    if (this.isAccessExpired(user)) {
+      user.setApiAccessToken(this.refreshAccessToken(user));
     }
     String accessToken = user.getApiAccessToken();
     String request = "https://api.spotify.com/v1/me";
-    JsonObject result = getRequest(accessToken, request); // GET request
+    JsonObject result = this.getRequest(accessToken, request); // GET request
     if (result.has("SONIC_SKILLZ_ERROR")) {
       System.err.println("ERROR: getArtistTracks failed.");
     }
@@ -253,8 +331,8 @@ public class APIHelper {
     if (result.get("images").getAsJsonArray() != null
         && result.get("images").getAsJsonArray().size() != 0) {
       // profile image
-      profileUrl = result.get("images").getAsJsonArray().get(0).getAsJsonObject().get("url")
-          .getAsString();
+      profileUrl = result.get("images").getAsJsonArray().get(0).getAsJsonObject()
+          .get("url").getAsString();
     }
     return profileUrl;
   }
@@ -263,18 +341,20 @@ public class APIHelper {
    * Gets the user account type (premium, free, or open).
    *
    * @param user user
+   *
    * @return account type
-   * @throws IOException if API request is rejected by Spotify server for whatever
-   *                     reason
+   *
+   * @throws IOException if API request is rejected by Spotify
+   *                     server for whatever reason
    */
   public String getAccountType(User user) throws IOException {
     // check if access token expired
-    if (isAccessExpired(user)) {
-      user.setApiAccessToken(refreshAccessToken(user));
+    if (this.isAccessExpired(user)) {
+      user.setApiAccessToken(this.refreshAccessToken(user));
     }
     String accessToken = user.getApiAccessToken();
     String request = "https://api.spotify.com/v1/me";
-    JsonObject result = getRequest(accessToken, request); // GET request
+    JsonObject result = this.getRequest(accessToken, request); // GET request
     if (result.has("SONIC_SKILLZ_ERROR")) {
       System.err.println("ERROR: getArtistTracks failed.");
       return null;
@@ -286,8 +366,9 @@ public class APIHelper {
    * POST request to retrieve a user's refresh token.
    *
    * @param user        user
-   * @param redirectUri redirect URI supplied when requesting the authorization
-   *                    code
+   * @param redirectUri redirect URI supplied when requesting
+   *                    the authorization code
+   *
    * @return user's refresh token
    */
   public String getRefreshToken(User user, String redirectUri) {
@@ -306,20 +387,29 @@ public class APIHelper {
       conn.setRequestProperty("Content-Type",
           "application/x-www-form-urlencoded; " + "charset=UTF-8");
       conn.setRequestProperty("Authorization", "Basic " + Constants.CLIENT_ID_SECRET);
-      // set the “Accept” request header to “application/json” to read the response in
+      // set the “Accept” request header to
+      // “application/json” to read the
+      // response in
       // JSON
       conn.setRequestProperty("Accept", "application/json");
-      // enable connection's doOutput property to true so we can write content to the
+      // enable connection's doOutput property
+      // to true so we can write content to
+      // the
       // connection
-      // output stream (i.e. send request content)
+      // output stream (i.e. send request
+      // content)
       conn.setDoOutput(true);
 
       // set parameters
       Map<String, String> arguments = new HashMap<>();
       arguments.put("grant_type", "authorization_code");
       arguments.put("code", authCode);
-      // This parameter is used for validation only (there is no actual redirection).
-      // The value of this parameter must exactly match the value of redirect_uri
+      // This parameter is used for validation
+      // only (there is no actual
+      // redirection).
+      // The value of this parameter must
+      // exactly match the value of
+      // redirect_uri
       // supplied when
       // requesting the authorization code.
       arguments.put("redirect_uri", redirectUri);
@@ -341,7 +431,8 @@ public class APIHelper {
       conn.connect();
 
       // get response body
-      BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+      BufferedReader br = new BufferedReader(
+          new InputStreamReader((conn.getInputStream())));
       String responseLine;
       StringBuilder response = new StringBuilder();
       while ((responseLine = br.readLine()) != null) {
@@ -360,10 +451,11 @@ public class APIHelper {
   }
 
   /**
-   * POST request to refresh a user's access token. Implicitly sets the user's
-   * last refreshed time.
+   * POST request to refresh a user's access token. Implicitly
+   * sets the user's last refreshed time.
    *
    * @param user user to refresh access token of
+   *
    * @return returns a new access token
    */
   public String refreshAccessToken(User user) {
@@ -382,11 +474,16 @@ public class APIHelper {
       conn.setRequestProperty("Content-Type",
           "application/x-www-form-urlencoded; " + "charset=UTF-8");
       conn.setRequestProperty("Authorization", "Basic " + Constants.CLIENT_ID_SECRET);
-      // set the “Accept” request header to “application/json” to read the response in
+      // set the “Accept” request header to
+      // “application/json” to read the
+      // response in
       // the desired format
       conn.setRequestProperty("Accept", "application/json");
-      // enable the URLConnection object's doOutput property to true to write content
-      // to the connection output stream and send request content
+      // enable the URLConnection object's
+      // doOutput property to true to write
+      // content
+      // to the connection output stream and
+      // send request content
       conn.setDoOutput(true);
 
       // create parameters
@@ -402,7 +499,8 @@ public class APIHelper {
       int length = out.length;
       conn.setFixedLengthStreamingMode(length);
 
-      // write content to connection output stream
+      // write content to connection output
+      // stream
       DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
       dos.write(out);
       dos.close();
@@ -410,7 +508,8 @@ public class APIHelper {
       conn.connect(); // connect to endpoint
 
       // read response body
-      BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+      BufferedReader br = new BufferedReader(
+          new InputStreamReader((conn.getInputStream())));
       String responseLine;
       StringBuilder response = new StringBuilder();
       while ((responseLine = br.readLine()) != null) {
@@ -419,7 +518,8 @@ public class APIHelper {
       // convert to JSON
       JsonObject data = new Gson().fromJson(String.valueOf(response), JsonObject.class);
       conn.disconnect();
-      user.setApiLastRefreshTime(System.currentTimeMillis() / 1000); // seconds since Unix
+      user.setApiLastRefreshTime(System.currentTimeMillis() / 1000); // seconds
+                                                                     // since Unix
                                                                      // epoch
       user.setApiAccessToken(data.get("access_token").getAsString());
       return data.get("access_token").getAsString();
@@ -434,10 +534,13 @@ public class APIHelper {
   }
 
   /**
-   * Helper method to check if user's access token has expired.
+   * Helper method to check if user's access token has
+   * expired.
    *
    * @param user user
-   * @return true if access token has expired; else returns false.
+   *
+   * @return true if access token has expired; else returns
+   *         false.
    */
   private boolean isAccessExpired(User user) {
     long currTime = System.currentTimeMillis() / 1000; // in seconds
@@ -445,9 +548,11 @@ public class APIHelper {
   }
 
   /**
-   * Helper method to parse a JsonArray of JsonObjects into Artist objects.
+   * Helper method to parse a JsonArray of JsonObjects into
+   * Artist objects.
    *
    * @param artistsArr JsonArray
+   *
    * @return a list of Artist objects
    */
   private List<Artist> parseArtists(JsonArray artistsArr) {
@@ -459,7 +564,8 @@ public class APIHelper {
     for (int i = 0; i < artistsArr.size(); i++) { // for each artist JSON object
       JsonObject artistData = artistsArr.get(i).getAsJsonObject();
       String jsonString = artistData.toString();
-      // directly convert JSON into Java object
+      // directly convert JSON into Java
+      // object
       Artist artist = new Gson().fromJson(jsonString, Artist.class);
       artists.add(artist);
     }
@@ -467,9 +573,11 @@ public class APIHelper {
   }
 
   /**
-   * Helper method to parse a JsonArray of JsonObjects into Track objects.
+   * Helper method to parse a JsonArray of JsonObjects into
+   * Track objects.
    *
    * @param tracksArr JsonArray
+   *
    * @return a list of Track objects
    */
   private List<Track> parseTracks(JsonArray tracksArr) {
@@ -481,10 +589,11 @@ public class APIHelper {
     for (int i = 0; i < tracksArr.size(); i++) { // for each track JSON object
       JsonObject trackData = tracksArr.get(i).getAsJsonObject();
       String jsonString = trackData.toString();
-
-      // directly convert JSON into Java object custom parsing for images
+      // directly convert JSON into Java
+      // object custom parsing for images
       Track track = new Gson().fromJson(jsonString, Track.class);
-      JsonArray imageArr = trackData.get("album").getAsJsonObject().get("images").getAsJsonArray();
+      JsonArray imageArr = trackData.get("album").getAsJsonObject().get("images")
+          .getAsJsonArray();
       List<Image> images = new ArrayList<>();
       for (int n = 0; n < imageArr.size(); n++) {
         JsonObject imageJ = imageArr.get(n).getAsJsonObject();
@@ -497,14 +606,129 @@ public class APIHelper {
     return tracks;
   }
 
+  private List<SpotifyPlaylist> parseSpotifyPlaylists(JsonArray playlistsArr,
+      String token) throws IOException {
+    if (playlistsArr.size() == 0) {
+      System.err.println("ERROR: JsonArray is empty.");
+    }
+
+    List<SpotifyPlaylist> playlists = new ArrayList<>();
+    for (int i = 0; i < playlistsArr.size(); i++) { // for each track JSON object
+      JsonObject playlistData = playlistsArr.get(i).getAsJsonObject();
+
+      String spotifyPlaylistId = playlistData.get("id").getAsString();
+      String name = playlistData.get("name").getAsString();
+      String uri = playlistData.get("uri").getAsString();
+      String description = playlistData.get("description").getAsString();
+      JsonArray imageArr = playlistData.get("images").getAsJsonArray();
+      String imageUrl;
+      if (imageArr.isJsonNull() || imageArr.size() < 1) {
+        imageUrl = Constants.SPOTIFY_LOGO;
+      } else {
+
+        imageUrl = imageArr.get(0).getAsJsonObject().get("url").getAsString();
+        if (imageUrl == null) {
+          System.out.println("ImageURL is null!!");
+          System.out.println(playlistData.getAsString());
+          imageUrl = Constants.SPOTIFY_LOGO;
+        }
+      }
+
+      String owner = playlistData.get("owner").getAsJsonObject().get("display_name")
+          .getAsString();
+      String externalUrl = playlistData.get("external_urls").getAsJsonObject()
+          .get("spotify").getAsString();
+      SpotifyPlaylist playlist = new SpotifyPlaylist(spotifyPlaylistId, name, uri,
+          description, imageUrl, owner, externalUrl);
+      // SpotifyPlaylist playlist =
+      // SpotifyDatabase.getSpotifyPlaylist(id);
+      if (playlist != null) {
+        playlists.add(playlist);
+      }
+    }
+    return playlists;
+  }
+
+  private SpotifyPlaylist parseSpotifyPlaylist(JsonObject playlistData, String token,
+      String playlistId) {
+    String name = playlistData.get("name").getAsString();
+    String uri = playlistData.get("uri").getAsString();
+    String description = playlistData.get("description").getAsString();
+    JsonArray imageList = playlistData.get("images").getAsJsonArray();
+    String imageUrl = Constants.SPOTIFY_LOGO;
+    if (!imageList.isJsonNull() && imageList.size() > 0) {
+      JsonObject items = imageList.get(0).getAsJsonObject();
+      imageUrl = items.get("url").getAsString();
+      if (imageUrl == null) {
+        System.out.println("ImageURL is null!!");
+        System.out.println(playlistData.getAsString());
+        imageUrl = Constants.SPOTIFY_LOGO;
+      }
+    }
+    String owner = playlistData.get("owner").getAsJsonObject().get("display_name")
+        .getAsString();
+    String externalUrl = playlistData.get("external_urls").getAsJsonObject()
+        .get("spotify").getAsString();
+    // String externalUrl
+    SpotifyPlaylist playlist = new SpotifyPlaylist(playlistId, name, uri, description,
+        imageUrl, owner, externalUrl);
+    JsonArray itemsArr = playlistData.get("tracks").getAsJsonObject().get("items")
+        .getAsJsonArray();
+
+    // parse
+    if (itemsArr.size() == 0) {
+      System.err.println("ERROR: JsonArray is empty.");
+    }
+    List<Track> tracks = new ArrayList<>();
+    for (int i = 0; i < itemsArr.size(); i++) { // for each item JSON object
+      JsonElement item = itemsArr.get(i).getAsJsonObject().get("track");
+      if (item == null || item.isJsonNull()) {
+        continue;
+      }
+      JsonObject trackData = item.getAsJsonObject();
+      JsonElement jsonId = trackData.get("id");
+      if (jsonId.isJsonNull()) {
+        System.out.print("JsonId");
+        System.out.println(jsonId);
+        continue;
+      }
+      String trackId = jsonId.getAsString();
+      Track track = SpotifyDatabase.getTrackNoQuery(trackId);
+      if (track == null) {
+        String jsonString = trackData.toString();
+        // directly convert JSON into Java object
+        track = new Gson().fromJson(jsonString, Track.class);
+        JsonArray imageArr = trackData.get("album").getAsJsonObject().get("images")
+            .getAsJsonArray();
+        // custom parsing for images
+        List<Image> images = new ArrayList<>();
+        for (int n = 0; n < imageArr.size(); n++) {
+          JsonObject imageJ = imageArr.get(n).getAsJsonObject();
+          Image image = new Gson().fromJson(imageJ.toString(), Image.class);
+          images.add(image);
+        }
+        track.setImages(images);
+
+        SpotifyDatabase.setTrack(trackId, track);
+      }
+
+      tracks.add(track);
+    }
+    playlist.setTracks(tracks);
+    return playlist;
+  }
+
   /**
-   * Helper method for generic GET request to an API that requires authorization.
+   * Helper method for generic GET request to an API that
+   * requires authorization.
    *
    * @param accessToken access token for API request
    * @param request     API request
+   *
    * @return JSON object of request result
-   * @throws IOException if API request is rejected by Spotify server for whatever
-   *                     reason
+   *
+   * @throws IOException if API request is rejected by Spotify
+   *                     server for whatever reason
    */
   private JsonObject getRequest(String accessToken, String request) throws IOException {
     try {
@@ -517,14 +741,16 @@ public class APIHelper {
       if (conn.getResponseCode() != 200) {
         // Too many requests
         if (conn.getResponseCode() == 429) {
-          // Spotify api will allow requests after this time interval (in seconds)
+          // Spotify api will allow requests after
+          // this time interval (in seconds)
           long waitTime = Long.parseLong(conn.getHeaderField("Retry-After"));
           // if we can afford to wait
           if (waitTime < Constants.MAX_WAIT_TIME_S) {
-            System.err.println("GET request failed, HTTP error code: " + conn.getResponseCode()
-                + ", retrying after (s): " + conn.getHeaderField("Retry-After"));
+            System.err
+                .println("GET request failed, HTTP error code: " + conn.getResponseCode()
+                    + ", retrying after (s): " + conn.getHeaderField("Retry-After"));
             TimeUnit.SECONDS.sleep(waitTime + 1L);
-            return getRequest(accessToken, request);
+            return this.getRequest(accessToken, request);
           } else {
             throw new RuntimeException(
                 "GET request failed, HTTP error code: " + conn.getResponseCode()
@@ -536,7 +762,8 @@ public class APIHelper {
         }
       }
 
-      BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+      BufferedReader br = new BufferedReader(
+          new InputStreamReader((conn.getInputStream())));
 
       String output;
       StringBuilder sb = new StringBuilder();

@@ -5,22 +5,26 @@ import java.util.List;
 
 /**
  * GameSession class, holds a game within a session.
- *
  */
-public class GameSession {
+public class GameSession
+{
   private final String gameCode;
   private final User host;
   private final int numSongs;
   private final List<User> usersInSession;
+  private String playlistOption;
   private boolean isLocked;
   private String webPlayerToken;
 
   /**
-   * Instantiates a game session with relevant information set.
+   * Instantiates a game session with relevant information
+   * set.
    *
    * @param host     User who is marked as host of the game
-   * @param gameCode String pertaining to the code used to join a game
-   * @param numSongs Number of songs needed in a Playlist for the game
+   * @param gameCode String pertaining to the code used to
+   *                 join a game
+   * @param numSongs Number of songs needed in a Playlist for
+   *                 the game
    */
   public GameSession(User host, String gameCode, int numSongs) {
     this.gameCode = gameCode;
@@ -40,7 +44,8 @@ public class GameSession {
   }
 
   /**
-   * Getter method for the game code used to refer to the game.
+   * Getter method for the game code used to refer to the
+   * game.
    *
    * @return String pertaining to code
    */
@@ -49,7 +54,8 @@ public class GameSession {
   }
 
   /**
-   * Getter method for the User that is marked as the host of the game.
+   * Getter method for the User that is marked as the host of
+   * the game.
    *
    * @return User object for the host
    */
@@ -103,7 +109,8 @@ public class GameSession {
   }
 
   /**
-   * Sets the boolean value of the locked-unlocked status of the session.
+   * Sets the boolean value of the locked-unlocked status of
+   * the session.
    *
    * @param locked boolean pertaining to locking the session
    */
@@ -127,5 +134,13 @@ public class GameSession {
     if (toRemove > -1) {
       this.getUsersInSession().remove(toRemove);
     }
+  }
+
+  public String getPlaylistOption() {
+    return this.playlistOption;
+  }
+
+  public void setPlaylistOption(String playlistOption) {
+    this.playlistOption = playlistOption;
   }
 }

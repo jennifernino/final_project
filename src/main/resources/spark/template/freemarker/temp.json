@@ -1,0 +1,34 @@
+{
+  "collaborative": false,
+  "description": "Today's top Latin hits are right here, on ¡Viva Latino! Cover: Aya Nakamura, Maluma",
+  "external_urls": {
+    "spotify": "https://open.spotify.com/playlist/37i9dQZF1DX10zKzsJ2jva"
+  },
+  "href": "https://api.spotify.com/v1/playlists/37i9dQZF1DX10zKzsJ2jva",
+  "id": "37i9dQZF1DX10zKzsJ2jva",
+  "images": [{
+    "height": null,
+    "url": "https://i.scdn.co/image/ab67706f0000000290949b53b98d435e30cabb83",
+    "width": null
+  }],
+  "name": "¡Viva Latino!",
+  "owner": {
+    "display_name": "Spotify",
+    "external_urls": {
+      "spotify": "https://open.spotify.com/user/spotify"
+    },
+    "href": "https://api.spotify.com/v1/users/spotify",
+    "id": "spotify",
+    "type": "user",
+    "uri": "spotify:user:spotify"
+  },
+  "primary_color": null,
+  "public": true,
+  "snapshot_id": "MTU5MzE0NDA2MCwwMDAwMDFlMTAwMDAwMTcyZWVjOTJhNTgwMDAwMDE3MmU4NGNkOWU3",
+  "tracks": {
+    "href": "https://api.spotify.com/v1/playlists/37i9dQZF1DX10zKzsJ2jva/tracks",
+    "total": 50
+  },
+  "type": "playlist",
+  "uri": "spotify:playlist:37i9dQZF1DX10zKzsJ2jva"
+}

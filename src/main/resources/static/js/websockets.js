@@ -12,7 +12,7 @@ const GAME_TYPE = {
 
 // Note: [heroku/deployment]: currently default ("ws") is set up for localhost, to switch to
 // heroku, change "ws://" to "wss://" below, and let REDIRECT_URI = REDIRECT_URI_HEROKU in Constants
-var conn = new WebSocket("wss://" + window.location.host +
+var conn = new WebSocket("ws://" + window.location.host +
   "/websocket/cs32/sonic/skillz/users");
 
 conn.onmessage = function(msg) {
@@ -69,15 +69,15 @@ conn.onmessage = function(msg) {
       break;
 
   }
-  console.log(msg);
 };
 
 setInterval(function() {
     conn.send(JSON.stringify({
-      message: "HELLOOOOOOO!!! I AM ALIVE!"
+      message: "Socket is still connected."
     }));
   },
   20000);
+
 conn.onclose = function(e) {
 
 };

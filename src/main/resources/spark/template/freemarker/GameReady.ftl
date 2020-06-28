@@ -2,6 +2,10 @@
 <div id="home-container" class="columns is-vcentered">
 	<div id="col" class="column is-vcentered">
 		<h1 id="subtitle" class="is-robot">Playlist is ready</h1>
+		<#if playOption>
+			<img id="album" src="${imageUrl}">
+			<p class="small-text">Playlist chosen: </p><strong id="host-badge" class="small-margin is-robot">${playlist}</strong>
+		</#if>
     <#if isHost>
 			<p class="section-header" >Choose a game difficulty:</p>
 			<form action="/begin-round" method='POST'>

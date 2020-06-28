@@ -12,20 +12,25 @@ import spark.Response;
 import spark.Route;
 
 /**
- * Contains all helper handlers for Spark POST routes in Main.
+ * Contains all helper handlers for Spark POST routes in
+ * Main.
  */
-public class PostHandlers {
+public class PostHandlers
+{
   /**
-   * Handler for "guess-the-song/waiting-room", executed when a user tries to join
-   * a game session (submits join session form).
+   * Handler for "guess-the-song/waiting-room", executed when
+   * a user tries to join a game session (submits join session
+   * form).
    */
-  protected static class WaitingRoomHandler implements Route {
+  protected static class WaitingRoomHandler implements Route
+  {
     @Override
     public String handle(Request request, Response response) {
       String userId = request.cookies().get("userID");
       String gameCode = request.queryMap().value("gameCode");
       String nickname = request.queryMap().value("nickname");
-      System.out.println("UserId:" + userId + " gameCode:" + gameCode + " nickname:" + nickname);
+      System.out.println(
+          "UserId:" + userId + " gameCode:" + gameCode + " nickname:" + nickname);
       if (userId == null) {
         response.redirect("/error/unf");
         return null;
@@ -45,8 +50,8 @@ public class PostHandlers {
       } else if (gameSession.getUsersInSession().size() >= 6) {
         response.redirect("/guess-the-song/join-session/max");
       } else {
-        List<String> nicknames = gameSession.getUsersInSession().stream().map(u -> u.getNickname())
-            .collect(Collectors.toList());
+        List<String> nicknames = gameSession.getUsersInSession().stream()
+            .map(u -> u.getNickname()).collect(Collectors.toList());
         if (nicknames.contains(nickname)) {
           response.redirect("/guess-the-song/join-session/exists");
         } else {
@@ -66,10 +71,12 @@ public class PostHandlers {
   }
 
   /**
-   * Handler for "guess-the-song/host-waiting-room", executed when a user tries to
-   * create a new game session (submits create session form).
+   * Handler for "guess-the-song/host-waiting-room", executed
+   * when a user tries to create a new game session (submits
+   * create session form).
    */
-  protected static class HostWaitingRoomHandler implements Route {
+  protected static class HostWaitingRoomHandler implements Route
+  {
     @Override
     public String handle(Request request, Response response) {
       String hostId = request.cookies().get("userID");
@@ -77,10 +84,15 @@ public class PostHandlers {
       String num = request.queryMap().value("numSongs");
       int numberSongs = Integer.parseInt(num);
 
-      GameSession gameSession = GameHandlers.createGameSession(hostId, nickname, numberSongs);
+      System.out.println("Host ID: " + hostId);
+      System.out.println("Nickname: " + nickname);
+      System.out.println("Number of songs: " + num);
+
+      GameSession gameSession = GameHandlers.createGameSession(hostId, nickname,
+          numberSongs);
       String gameCode = gameSession.getGameCode();
-      System.out
-          .println("GameSes exists:" + GameHandlers.gameCodeToGameSession.containsKey(gameCode));
+      System.out.println(
+          "GameSes exists:" + GameHandlers.gameCodeToGameSession.containsKey(gameCode));
       response.cookie("gameCode", gameCode);
 
       // associate potential host to the created gameCode
@@ -93,17 +105,27 @@ public class PostHandlers {
   }
 
   /**
-   * Handler for "guess-the-song/start-game", executed when a user starts a game
-   * (clicks "Start Game"). Due to the way WaitingRoom.ftl is set up, only host
-   * would be able to access this route, and therefore start the game.
+   * Handler for "guess-the-song/start-game", executed when a
+   * user starts a game (clicks "Start Game"). Due to the way
+   * WaitingRoom.ftl is set up, only host would be able to
+   * access this route, and therefore start the game.
    */
-  protected static class StartGameHandler implements Route {
+  protected static class StartGameHandler implements Route
+  {
     @Override
     public String handle(Request request, Response response) {
       String hostId = request.cookies().get("userID");
       String gameCode = request.cookies().get("gameCode");
       GameSession gameSession = GameHandlers.gameCodeToGameSession.get(gameCode);
+      for (String key : request.queryMap().toMap().keySet()) {
+        System.out.println("-> -> -> Key: " + key);
+        System.out.println("-> -> -> Value: " + request.queryMap().value(key));
 
+      }
+      String playlistOption = request.queryMap().value("playlistOption");
+      if (playlistOption == null || playlistOption.length() == 0) {
+        playlistOption = "None";
+      }
 //      for (User user : gameSession.getUsersInSession()) {
 //        if (user.getSpotifyAccountType().equals("premium")) {
 //          gameSession.setPremiumUser(user);
@@ -112,6 +134,7 @@ public class PostHandlers {
 //      if (gameSession.getPremiumUser() == null) {
 //        Spark.halt(401, "This game session does not contain a premium user.");
 //      }
+      gameSession.setPlaylistOption(playlistOption);
       GameHandlers.initGame(gameSession); // start game
       WebSocketHandlers.replyLocked(hostId, gameCode);
       response.redirect("/guess-the-song/start-game"); // GET
@@ -120,10 +143,11 @@ public class PostHandlers {
   }
 
   /**
-   * Handler for "/get-next-round", executed when a user goes to next round
-   * (clicks "Let's Go").
+   * Handler for "/get-next-round", executed when a user goes
+   * to next round (clicks "Let's Go").
    */
-  protected static class NextRoundHandler implements Route {
+  protected static class NextRoundHandler implements Route
+  {
     @Override
     public String handle(Request request, Response response) {
       String userId = request.cookies().get("userID");
@@ -144,7 +168,8 @@ public class PostHandlers {
   /**
    * Handler for "/begin-round".
    */
-  protected static class BeginRoundHandler implements Route {
+  protected static class BeginRoundHandler implements Route
+  {
     @Override
     public String handle(Request request, Response response) {
       Map<String, String> cookies = request.cookies();
@@ -164,11 +189,12 @@ public class PostHandlers {
   }
 
   /**
-   * Handler for "/guess-the-song/guess-submitted", executed when a user submits
-   * their guess (clicks "Submit"). Checks if a user's guess is correct, and
-   * updates the gui.
+   * Handler for "/guess-the-song/guess-submitted", executed
+   * when a user submits their guess (clicks "Submit"). Checks
+   * if a user's guess is correct, and updates the gui.
    */
-  protected static class GuessSubmittedHandler implements Route {
+  protected static class GuessSubmittedHandler implements Route
+  {
     @Override
     public String handle(Request request, Response response) {
       String gameCode = request.cookies().get("gameCode");

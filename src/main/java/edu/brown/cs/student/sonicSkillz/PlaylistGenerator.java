@@ -19,14 +19,13 @@ import edu.brown.cs.student.sonicSkillz.gameunits.Track;
 import edu.brown.cs.student.sonicSkillz.gameunits.User;
 
 /**
- * Holds the playlist generating algorithm. Playlist uses the API as well as
- * information stored in a remote cached Database in order to generate
- * customized playlists based on user songs, user artists, and level of
- * difficulty.
- *
- *
+ * Holds the playlist generating algorithm. Playlist uses
+ * the API as well as information stored in a remote cached
+ * Database in order to generate customized playlists based
+ * on user songs, user artists, and level of difficulty.
  */
-public class PlaylistGenerator {
+public class PlaylistGenerator
+{
 
   public APIHelper api;
   public DatabaseHelper database;
@@ -40,15 +39,18 @@ public class PlaylistGenerator {
   }
 
   /**
-   * Generates a random easy, medium, and hard playlist based on a combination of
-   * the input users libraries.
+   * Generates a random easy, medium, and hard playlist based
+   * on a combination of the input users libraries.
    *
-   * @param users             the set of users who's libraries the playlist will
-   *                          be based on
-   * @param numSongsPerPlayer the number of songs per user in the playlist (does
-   *                          not correlate to the number of songs that comes from
-   *                          each library)
-   * @return a list of playlists, in the order easy, medium, hard
+   * @param users             the set of users who's libraries
+   *                          the playlist will be based on
+   * @param numSongsPerPlayer the number of songs per user in
+   *                          the playlist (does not correlate
+   *                          to the number of songs that
+   *                          comes from each library)
+   *
+   * @return a list of playlists, in the order easy, medium,
+   *         hard
    */
   public List<Playlist> generate(List<User> users, Integer numSongsPerPlayer) {
     Map<Track, Integer> dictSong = new HashMap<Track, Integer>();
@@ -93,7 +95,8 @@ public class PlaylistGenerator {
         if (topArtists != null && topArtists.size() > 0) {
           for (int i = 0; i < Constants.MAX_NUMBER_OF_TOP_ARTISTS
               && i < player.getTopArtists().size(); i++) {
-            List<Track> topArtistTracks = this.api.getArtistTracks(player, topArtists.get(i));
+            List<Track> topArtistTracks = this.api.getArtistTracks(player,
+                topArtists.get(i));
             for (int j = 0; j < Constants.MAX_NUMBER_SONGS_FROM_TOP_ARTISTS
                 && j < topArtistTracks.size(); j++) {
               topArtistTracks.get(j).cleanNames();
@@ -135,26 +138,24 @@ public class PlaylistGenerator {
       // Weighting math
       Double w1;
       if (occurences.equals(0.0)) {
-        w1 = Math.pow(Constants.FRACTION_OF_APPEARANCES_OUTSIDE_OF_TOP_TRACKS / users.size(),
+        w1 = Math.pow(
+            Constants.FRACTION_OF_APPEARANCES_OUTSIDE_OF_TOP_TRACKS / users.size(),
             Constants.EXPONENT_OF_LIBRARY_APPEARNCES);
       } else {
-        w1 = Math.pow(occurences / users.size(), Constants.EXPONENT_OF_LIBRARY_APPEARNCES);
+        w1 = Math.pow(occurences / users.size(),
+            Constants.EXPONENT_OF_LIBRARY_APPEARNCES);
       }
       Double w2 = Math.pow(song.getPopularity() / Constants.POPULARITY_MAX,
           Constants.EXPONENT_OF_POPULARITY);
       song.setWeight(w1 * w2);
-      System.out.println("EARLIER PRINTS: " + song.getName() + ": weight=" + song.getWeight()
-          + "; w1=" + w1 + "; w2=" + w2 + "; occurences=" + dictSong.get(song) + "; popularity="
-          + song.getPopularity());
       pq.add(song);
     }
     Double similarity = simNumerator
         / (Constants.MAX_NUMBER_TOP_SONGS_FROM_LIBRARY * users.size() * users.size());
-    System.out.println("Similarity score: " + similarity);
     if (similarity < Constants.SIMILARITY_MINIMUM) {
       DatabaseHelper data = new DatabaseHelper();
       List<Track> songs = data.openPlaylist("data/top2019").getTracks();
-      List<Integer> songIndices = getPermutation(0, songs.size());
+      List<Integer> songIndices = this.getPermutation(0, songs.size());
       for (int i = 0; i < users.size() * Constants.NUM_SIMILARITY_SONGS_PER_PERSON; i++) {
         Track song = songs.get(songIndices.get(i));
         song.cleanNames();
@@ -172,16 +173,11 @@ public class PlaylistGenerator {
     // PRINT PRIORITY QUEUE
     PriorityQueue<Track> pq2 = new PriorityQueue<Track>();
     Object[] arr = pq.toArray();
-    System.out.println("ARRAY SIZE:" + arr.length);
     for (int i = 0; i < arr.length; i++) {
       pq2.add((Track) arr[i]);
     }
-    System.out
-        .println("SIZE OF SECOND PQ:" + pq2.size() + " (size of original is " + pq.size() + ".");
     while (!pq2.isEmpty()) {
-      Track song = pq2.poll();
-      System.out.println(song.getName() + ": weight=" + song.getWeight() + "; occurences="
-          + dictSong.get(song) + "; popularity=" + song.getPopularity());
+      pq2.poll();
     }
     System.out.println("Priority queue is finished printing.");
     // 3. Get random distributions from the PQ
@@ -197,19 +193,25 @@ public class PlaylistGenerator {
   }
 
   /**
-   * Returns a random playlist based on a priority queue of weighted tracks.
+   * Returns a random playlist based on a priority queue of
+   * weighted tracks.
    *
-   * @param pq             Priority queue of tracks, given weights based on
-   *                       popularity and existence in user libraries
-   * @param sizeOfPlaylist Min size of playlist needed for gameplay
+   * @param pq             Priority queue of tracks, given
+   *                       weights based on popularity and
+   *                       existence in user libraries
+   * @param sizeOfPlaylist Min size of playlist needed for
+   *                       gameplay
    * @param dif            Level of difficulty indicated
+   *
    * @return The specific playlist to be used in a game
    */
-  public Playlist pqToRandomPlaylist(PriorityQueue<Track> pq, Integer sizeOfPlaylist, String dif) {
+  public Playlist pqToRandomPlaylist(PriorityQueue<Track> pq, Integer sizeOfPlaylist,
+      String dif) {
     if (pq.size() < sizeOfPlaylist) {
       return null;
     }
-    // Get tier indices and sizes from the priority queue; create permutations of
+    // Get tier indices and sizes from the priority queue;
+    // create permutations of
     // indices from each tier
     Integer top = pq.size();
     Integer topMiddle = (int) (top * Constants.TOP_OF_MIDDLE_TIER_REGION);
@@ -218,14 +220,17 @@ public class PlaylistGenerator {
     tierSizes.add(top - topMiddle);
     tierSizes.add(topMiddle - middleBottom);
     tierSizes.add(middleBottom);
-    // Calculate the number of songs being requested from the priority queue in each
+    // Calculate the number of songs being requested from the
+    // priority queue in each
     // tier
     ArrayList<Integer> tierReqs = this.getTierReqs(sizeOfPlaylist, dif);
     // Adjust requests to be smaller than size of tiers
     this.balanceTiers(tierSizes, tierReqs);
     // Get random positions to pop to pop from tier requests
-    ArrayList<Integer> positions = this.getPositionsToPop(tierReqs, top, topMiddle, middleBottom);
-    // Pop everything in the priority queue and save the song at each relevant
+    ArrayList<Integer> positions = this.getPositionsToPop(tierReqs, top, topMiddle,
+        middleBottom);
+    // Pop everything in the priority queue and save the song at
+    // each relevant
     // index to a playlist. Return
     Playlist playlist = new Playlist();
     Integer count = 0;
@@ -243,12 +248,13 @@ public class PlaylistGenerator {
   }
 
   /**
-   * Returns a list of 3 random playlists based on a priority queue of weighted
-   * tracks.
+   * Returns a list of 3 random playlists based on a priority
+   * queue of weighted tracks.
    *
-   * @param pq             the priority queue from which the playlist's tracks are
-   *                       selected.
+   * @param pq             the priority queue from which the
+   *                       playlist's tracks are selected.
    * @param sizeOfPlaylist the size of the output playlists.
+   *
    * @return a list of playlists
    */
   public ArrayList<Playlist> pqToRandomPlaylistAll(PriorityQueue<Track> pq,
@@ -256,7 +262,8 @@ public class PlaylistGenerator {
     if (pq.size() < sizeOfPlaylist) {
       return null;
     }
-    // Get tier indices and sizes from the priority queue; create permutations of
+    // Get tier indices and sizes from the priority queue;
+    // create permutations of
     // indices from each tier
     Integer top = pq.size();
     Integer topMiddle = (int) (top * Constants.TOP_OF_MIDDLE_TIER_REGION);
@@ -265,7 +272,8 @@ public class PlaylistGenerator {
     tierSizes.add(top - topMiddle);
     tierSizes.add(topMiddle - middleBottom);
     tierSizes.add(middleBottom);
-    // Calculate the number of songs being requested from the priority queue in each
+    // Calculate the number of songs being requested from the
+    // priority queue in each
     // tier
     ArrayList<Integer> tierReqsEasy = this.getTierReqs(sizeOfPlaylist, "easy");
     ArrayList<Integer> tierReqsMed = this.getTierReqs(sizeOfPlaylist, "medium");
@@ -275,13 +283,14 @@ public class PlaylistGenerator {
     this.balanceTiers(tierSizes, tierReqsMed);
     this.balanceTiers(tierSizes, tierReqsHard);
     // Get random positions to pop to pop from tier requests
-    ArrayList<Integer> positionsEasy = this.getPositionsToPop(tierReqsEasy, top, topMiddle,
-        middleBottom);
+    ArrayList<Integer> positionsEasy = this.getPositionsToPop(tierReqsEasy, top,
+        topMiddle, middleBottom);
     ArrayList<Integer> positionsMed = this.getPositionsToPop(tierReqsMed, top, topMiddle,
         middleBottom);
-    ArrayList<Integer> positionsHard = this.getPositionsToPop(tierReqsHard, top, topMiddle,
-        middleBottom);
-    // Pop everything in the priority queue and save the song at each relevant
+    ArrayList<Integer> positionsHard = this.getPositionsToPop(tierReqsHard, top,
+        topMiddle, middleBottom);
+    // Pop everything in the priority queue and save the song at
+    // each relevant
     // index to a playlist. Return
     Playlist playlistEasy = new Playlist();
     Playlist playlistMed = new Playlist();
@@ -290,10 +299,13 @@ public class PlaylistGenerator {
     Integer indexToPollMed = 0;
     Integer indexToPollHard = 0;
     Integer count = 0;
-    // Pop songs from the priority queue and add them to relevant playlist if
-    // they are at a position that's specified in the positions arrays.
+    // Pop songs from the priority queue and add them to
+    // relevant playlist if
+    // they are at a position that's specified in the positions
+    // arrays.
     while ((!pq.isEmpty()) && (playlistEasy.getSize() < sizeOfPlaylist
-        || playlistMed.getSize() < sizeOfPlaylist || playlistHard.getSize() < sizeOfPlaylist)) {
+        || playlistMed.getSize() < sizeOfPlaylist
+        || playlistHard.getSize() < sizeOfPlaylist)) {
       Track curr = pq.poll();
       curr.cleanNames();
       if (indexToPollEasy < positionsEasy.size()
@@ -301,7 +313,8 @@ public class PlaylistGenerator {
         playlistEasy.addTrack(curr);
         indexToPollEasy++;
       }
-      if (indexToPollMed < positionsMed.size() && count.equals(positionsMed.get(indexToPollMed))) {
+      if (indexToPollMed < positionsMed.size()
+          && count.equals(positionsMed.get(indexToPollMed))) {
         playlistMed.addTrack(curr);
         indexToPollMed++;
       }
@@ -320,13 +333,16 @@ public class PlaylistGenerator {
   }
 
   /**
-   * Returns the numbers of songs that need to come from the top third, middle
-   * third, and bottom third of a playlist given its size and difficulty.
+   * Returns the numbers of songs that need to come from the
+   * top third, middle third, and bottom third of a playlist
+   * given its size and difficulty.
    *
    * @param sizeOfPlaylist size of the playlist.
    * @param dif            difficulty level for the playlist.
-   * @return an array of integers that represent the number of songs to be taken
-   *         from each tier Determines sizes of tiers for each level of difficulty
+   *
+   * @return an array of integers that represent the number of
+   *         songs to be taken from each tier Determines sizes
+   *         of tiers for each level of difficulty
    */
   public ArrayList<Integer> getTierReqs(Integer sizeOfPlaylist, String dif) {
     ArrayList<Integer> tierReqs = new ArrayList<Integer>();
@@ -361,24 +377,29 @@ public class PlaylistGenerator {
   }
 
   /**
-   * Returns a list of positions (or indices) in the priority queue that have been
-   * selected to form the playlist.
+   * Returns a list of positions (or indices) in the priority
+   * queue that have been selected to form the playlist.
    *
-   * @param tierReqs     an array containing the number of songs required from
-   *                     each of the three tiers
-   * @param top          the number that bounds the top of the priority queue and
-   *                     the top tier.
-   * @param topMiddle    the number that bounds the bottom two third of the
-   *                     priotiy queue and the middle tier.
-   * @param middleBottom the number that bounds the bottom third of the priotity
-   *                     queue and the bottom tier.
+   * @param tierReqs     an array containing the number of
+   *                     songs required from each of the three
+   *                     tiers
+   * @param top          the number that bounds the top of the
+   *                     priority queue and the top tier.
+   * @param topMiddle    the number that bounds the bottom two
+   *                     third of the priotiy queue and the
+   *                     middle tier.
+   * @param middleBottom the number that bounds the bottom
+   *                     third of the priotity queue and the
+   *                     bottom tier.
+   *
    * @return a list of indices/positions.
    */
   public ArrayList<Integer> getPositionsToPop(ArrayList<Integer> tierReqs, Integer top,
       Integer topMiddle, Integer middleBottom) {
-    LinkedList<Integer> topTierPermutation = getPermutation(topMiddle, top);
-    LinkedList<Integer> middleTierPermutation = getPermutation(middleBottom, topMiddle);
-    LinkedList<Integer> bottomTierPermutation = getPermutation(0, middleBottom);
+    LinkedList<Integer> topTierPermutation = this.getPermutation(topMiddle, top);
+    LinkedList<Integer> middleTierPermutation = this.getPermutation(middleBottom,
+        topMiddle);
+    LinkedList<Integer> bottomTierPermutation = this.getPermutation(0, middleBottom);
     ArrayList<Integer> positions = new ArrayList<Integer>();
     for (int i = 0; i < tierReqs.get(0); i++) {
       positions.add(topTierPermutation.poll());
@@ -394,14 +415,18 @@ public class PlaylistGenerator {
   }
 
   /**
-   * Ensures that the number of songs being selected from each tier are not
-   * greater than the size of the tiers themselves.
+   * Ensures that the number of songs being selected from each
+   * tier are not greater than the size of the tiers
+   * themselves.
    *
-   * @param greater an array that represents the upper boundary of tier sizes.
-   * @param smaller an array that represents the number of songs being requested
-   *                from each tier.
-   * @return a modified version of the smaller array, so that it is bounded by the
-   *         greater but so that the sum of all elements is the same, if possible.
+   * @param greater an array that represents the upper
+   *                boundary of tier sizes.
+   * @param smaller an array that represents the number of
+   *                songs being requested from each tier.
+   *
+   * @return a modified version of the smaller array, so that
+   *         it is bounded by the greater but so that the sum
+   *         of all elements is the same, if possible.
    */
   public Boolean balanceTiers(ArrayList<Integer> greater, ArrayList<Integer> smaller) {
     if (greater.size() != smaller.size()) {
@@ -434,11 +459,13 @@ public class PlaylistGenerator {
   }
 
   /**
-   * Randomly orders numbers from start (inclusive) to end (exclusive) and places
-   * them in an array.
+   * Randomly orders numbers from start (inclusive) to end
+   * (exclusive) and places them in an array.
    *
-   * @param start the first number to be included in the array.
+   * @param start the first number to be included in the
+   *              array.
    * @param end   the number to bound the array.
+   *
    * @return an array of randomly ordered numbers.
    */
   public LinkedList<Integer> getPermutation(Integer start, Integer end) {

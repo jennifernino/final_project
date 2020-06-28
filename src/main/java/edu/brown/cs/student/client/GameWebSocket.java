@@ -15,16 +15,18 @@ import edu.brown.cs.student.sonicSkillz.gameunits.User;
 
 /**
  * Builds the websockets connections for the game.
- *
  */
 @WebSocket
-public class GameWebSocket {
+public class GameWebSocket
+{
 
   /**
-   * Establishes connection to a WebSocket to allow multiplayer functionalities of
-   * game.
+   * Establishes connection to a WebSocket to allow
+   * multiplayer functionalities of game.
    *
-   * @param session Session object for which websocket is being connected
+   * @param session Session object for which websocket is
+   *                being connected
+   *
    * @throws Exception Thrown if UserID is invalid
    */
   @OnWebSocketConnect
@@ -67,12 +69,14 @@ public class GameWebSocket {
   }
 
   /**
-   * Receives message when sent by socket. This message is sent to keep the socket
-   * alive
+   * Receives message when sent by socket. This message is
+   * sent to keep the socket alive
    *
    * @param session that is sending the message
    * @param message arbitrary message send
-   * @throws IOException String pertaining to reason for closing
+   *
+   * @throws IOException String pertaining to reason for
+   *                     closing
    */
   @OnWebSocketMessage
   public void message(Session session, String message) throws IOException {
@@ -80,7 +84,8 @@ public class GameWebSocket {
   }
 
   /**
-   * Closes the websocket and provides us with information in the command line.
+   * Closes the websocket and provides us with information in
+   * the command line.
    *
    * @param user       Session object
    * @param statusCode Int representing the status code
